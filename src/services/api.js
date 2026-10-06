@@ -9,9 +9,9 @@ const isLocalhost =
     window.location.hostname.startsWith('10.') ||
     window.location.hostname.endsWith('.local'));
 
-const API_BASE_URL = isLocalhost
-  ? '/api'
-  : (import.meta.env.VITE_API_URL || 'https://dara-digital-backend.onrender.com/api');
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  (isLocalhost ? 'http://localhost:5001/api' : 'https://dara-digital-backend.onrender.com/api');
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
