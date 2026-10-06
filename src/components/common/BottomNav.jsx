@@ -3,10 +3,12 @@ import { NavLink } from 'react-router-dom';
 import { Wallet } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { useTelegram } from '../../hooks/useTelegram.js';
+import { useAuth } from '../../context/AuthContext.jsx';
 
 export function BottomNav() {
   const { t } = useLanguage();
   const { haptic } = useTelegram();
+  const { user, openAuthModal } = useAuth();
 
   const navItems = [
     {
@@ -59,7 +61,13 @@ export function BottomNav() {
             <NavLink
               key={item.to}
               to={item.to}
-              onClick={() => haptic('selection')}
+              onClick={(e) => {
+                haptic('selection');
+                if (!user && ['/wallet', '/orders', '/profile'].includes(item.to)) {
+                  e.preventDefault();
+                  openAuthModal();
+                }
+              }}
               className={({ isActive }) =>
                 `group flex flex-col items-center justify-center flex-1 h-full py-1 text-xs font-medium transition-all duration-300 relative active:scale-90 ${
                   isActive

@@ -27,7 +27,7 @@ import { TopUpModal } from '../components/payment/TopUpModal.jsx';
 
 export function Checkout() {
   const { items, finalTotal, subtotal, discountAmount, couponCode, clearCart } = useCart();
-  const { user, refreshProfile } = useAuth();
+  const { user, refreshProfile, openAuthModal } = useAuth();
   const { lang, t } = useLanguage();
   const toast = useToast();
   const { haptic } = useTelegram();
@@ -65,6 +65,12 @@ export function Checkout() {
 
   const handleCheckoutSubmit = async (e) => {
     e.preventDefault();
+    if (!user) {
+      toast.info('Please sign in with Google to complete your order.');
+      openAuthModal();
+      return;
+    }
+
     if (!agreedTerms) {
       toast.warning('Please agree to the delivery terms before proceeding.');
       return;

@@ -9,7 +9,7 @@ import { useTelegram } from '../hooks/useTelegram.js';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export function Orders() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, openAuthModal } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,6 +45,24 @@ export function Orders() {
     return (
       <div className="py-16 text-center text-slate-400 text-sm">
         {t('common.loading')}
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="py-16 text-center max-w-md mx-auto space-y-4 px-4">
+        <div className="w-14 h-14 rounded-2xl bg-pink-500/20 border border-pink-500/40 text-pink-400 flex items-center justify-center mx-auto">
+          <Package className="w-7 h-7" />
+        </div>
+        <h2 className="text-lg font-black text-slate-100">Sign In to View Orders</h2>
+        <p className="text-xs text-slate-400">Please sign in with Google to view your order history and purchased digital codes.</p>
+        <button
+          onClick={openAuthModal}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-slate-900 font-extrabold text-xs hover:bg-slate-100 transition-all shadow-md active:scale-95"
+        >
+          <span>Continue with Google</span>
+        </button>
       </div>
     );
   }

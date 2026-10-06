@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { Header } from '../components/common/Header.jsx';
 import { BottomNav } from '../components/common/BottomNav.jsx';
+import { GoogleAuthModal } from '../components/auth/GoogleAuthModal.jsx';
 import { Shield, Zap, Heart, MessageCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext.jsx';
 
@@ -18,17 +19,17 @@ export function MainLayout() {
         <Outlet />
       </main>
 
-      {/* Desktop Footer (Hidden on small mobile screens to save space for Telegram Mini App) */}
+      {/* Desktop Footer */}
       <footer className="hidden sm:block border-t border-slate-800/80 bg-slate-900/40 text-slate-400 text-xs py-8 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="brand-text-animated font-bold text-sm tracking-wide">𝑀𝑎𝑖𝑠𝑒𝑟 𝑆𝑡𝑜𝑟𝑒</span>
             <span>•</span>
-            <span>Instant Telegram Mini App</span>
+            <span>Official Digital Products Store</span>
           </div>
 
           <div className="flex items-center gap-6">
-            <Link to="/support" className="hover:text-emerald-400 transition-colors flex items-center gap-1">
+            <Link to="/support" className="hover:text-pink-400 transition-colors flex items-center gap-1">
               <MessageCircle className="w-3.5 h-3.5" />
               <span>{t('profile.support')}</span>
             </Link>
@@ -44,8 +45,11 @@ export function MainLayout() {
         </div>
       </footer>
 
-      {/* Telegram Mobile Bottom Navigation */}
+      {/* Mobile Navigation */}
       <BottomNav />
+
+      {/* Global Google Authentication & Registration Modal */}
+      <GoogleAuthModal />
     </div>
   );
 }

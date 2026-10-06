@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { endpoints } from '../services/api.js';
-import { useTelegram } from '../hooks/useTelegram.js';
 import { useToast } from './ToastContext.jsx';
 
 const AuthContext = createContext();
@@ -9,8 +8,11 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(() => localStorage.getItem('daramini_token'));
   const [loading, setLoading] = useState(true);
-  const { initData, user: tgUser } = useTelegram();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const toast = useToast();
+
+  const openAuthModal = () => setIsAuthModalOpen(true);
+  const closeAuthModal = () => setIsAuthModalOpen(false);
 
   const loadUserProfile = useCallback(async () => {
     try {
@@ -33,6 +35,7 @@ export function AuthProvider({ children }) {
     const handleUnauthorized = () => {
       setUser(null);
       setToken(null);
+      localStorage.removeItem('daramini_token');
     };
     window.addEventListener('daramini:unauthorized', handleUnauthorized);
     return () => window.removeEventListener('daramini:unauthorized', handleUnauthorized);
@@ -45,18 +48,6 @@ export function AuthProvider({ children }) {
     async function initAuth() {
       setLoading(true);
       try {
-        // If running inside Telegram with valid initData
-        if (initData) {
-          const res = await endpoints.telegramAuth(initData);
-          if (res.success && isMounted) {
-            localStorage.setItem('daramini_token', res.data.token);
-            setToken(res.data.token);
-            setUser(res.data.user);
-            return;
-          }
-        }
-
-        // Check if existing token in localStorage is valid
         const savedToken = localStorage.getItem('daramini_token');
         if (savedToken) {
           try {
@@ -66,24 +57,8 @@ export function AuthProvider({ children }) {
               return;
             }
           } catch (err) {
-            // Token invalid or expired
             localStorage.removeItem('daramini_token');
             if (isMounted) setToken(null);
-          }
-        }
-
-        // Fallback: auto-login with dev user in browser dev mode
-        if (isMounted) {
-          const res = await endpoints.mockLogin({
-            telegramId: 8361673413,
-            username: 'darazzdev',
-            firstName: 'Dara Admin',
-            roles: ['SUPER_ADMIN', 'ADMIN', 'USER']
-          });
-          if (res.success && isMounted) {
-            localStorage.setItem('daramini_token', res.data.token);
-            setToken(res.data.token);
-            setUser(res.data.user);
           }
         }
       } catch (err) {
@@ -99,7 +74,27 @@ export function AuthProvider({ children }) {
     return () => {
       isMounted = false;
     };
-  }, [initData]);
+  }, [loadUserProfile]);
+
+  const loginWithGoogle = async (googlePayload) => {
+    setLoading(true);
+    try {
+      const res = await endpoints.googleAuth(googlePayload);
+      if (res.success && res.data) {
+        localStorage.setItem('daramini_token', res.data.token);
+        setToken(res.data.token);
+        setUser(res.data.user);
+        toast.success(`Welcome back, ${res.data.user.first_name || 'Customer'}!`);
+        return { success: true, user: res.data.user };
+      }
+      throw new Error(res.message || 'Google Login failed');
+    } catch (err) {
+      toast.error(err.message || 'Google authentication failed');
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loginAsMock = async (role = 'USER') => {
     setLoading(true);
@@ -117,28 +112,10 @@ export function AuthProvider({ children }) {
         setToken(res.data.token);
         setUser(res.data.user);
         toast.success(`Logged in as ${isSuper ? '@darazzdev (Admin)' : 'Customer'}`);
+        return { success: true, user: res.data.user };
       }
     } catch (err) {
       toast.error(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loginWithGoogle = async (googlePayload) => {
-    setLoading(true);
-    try {
-      const res = await endpoints.googleAuth(googlePayload);
-      if (res.success && res.data) {
-        localStorage.setItem('daramini_token', res.data.token);
-        setToken(res.data.token);
-        setUser(res.data.user);
-        toast.success(`Google Admin Login: Welcome ${res.data.user.first_name || 'Admin'}!`);
-        return { success: true, user: res.data.user };
-      }
-      throw new Error(res.message || 'Google Login failed');
-    } catch (err) {
-      toast.error(err.message || 'Google authentication failed');
       return { success: false, error: err.message };
     } finally {
       setLoading(false);
@@ -149,11 +126,13 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('daramini_token');
     setToken(null);
     setUser(null);
+    toast.success('Logged out successfully');
   };
 
   const isAdmin = Boolean(
     (user?.username && user.username.toLowerCase() === 'darazzdev') ||
-    String(user?.telegram_id) === '8361673413' ||
+    (user?.email && user.email.toLowerCase().includes('admin')) ||
+    (user?.email && user.email.toLowerCase().includes('darazzdev')) ||
     user?.roles?.some((r) => ['ADMIN', 'SUPER_ADMIN'].includes(r))
   );
 
@@ -164,10 +143,13 @@ export function AuthProvider({ children }) {
         token,
         loading,
         isAdmin,
+        isAuthModalOpen,
+        openAuthModal,
+        closeAuthModal,
         setUser,
         refreshProfile: loadUserProfile,
-        loginAsMock,
         loginWithGoogle,
+        loginAsMock,
         logout
       }}
     >
