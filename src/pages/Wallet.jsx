@@ -17,7 +17,7 @@ import { useTelegram } from '../hooks/useTelegram.js';
 import { TopUpModal } from '../components/payment/TopUpModal.jsx';
 
 export function Wallet() {
-  const { user, refreshProfile } = useAuth();
+  const { user, loading: authLoading, refreshProfile } = useAuth();
   const [wallet, setWallet] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,10 +37,12 @@ export function Wallet() {
         endpoints.getWallet(),
         endpoints.getWalletTransactions({ limit: 50 })
       ]);
-      if (wRes.success) setWallet(wRes.data);
-      if (txRes.success) setTransactions(txRes.data.items || []);
+      if (wRes?.success) setWallet(wRes.data);
+      if (txRes?.success) setTransactions(txRes.data.items || []);
     } catch (err) {
-      console.error('Error fetching wallet:', err);
+      if (err?.message !== 'Request aborted' && err?.name !== 'CanceledError') {
+        console.warn('Error fetching wallet:', err.message || err);
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -48,8 +50,13 @@ export function Wallet() {
   };
 
   useEffect(() => {
-    loadWalletData();
-  }, []);
+    if (authLoading) return;
+    if (user) {
+      loadWalletData();
+    } else {
+      setLoading(false);
+    }
+  }, [user, authLoading]);
 
   const handleOpenTopUp = (amount = null) => {
     haptic('medium');

@@ -6,7 +6,10 @@ import { Badge } from '../components/common/Badge.jsx';
 import { useLanguage } from '../context/LanguageContext.jsx';
 import { useTelegram } from '../hooks/useTelegram.js';
 
+import { useAuth } from '../context/AuthContext.jsx';
+
 export function Orders() {
+  const { user, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -14,6 +17,12 @@ export function Orders() {
   const { haptic } = useTelegram();
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
     async function loadOrders() {
       setLoading(true);
       try {
@@ -22,13 +31,15 @@ export function Orders() {
           setOrders(res.data.items || []);
         }
       } catch (err) {
-        console.error('Error fetching orders:', err);
+        if (err?.message !== 'Request aborted' && err?.name !== 'CanceledError') {
+          console.warn('Error fetching orders:', err.message || err);
+        }
       } finally {
         setLoading(false);
       }
     }
     loadOrders();
-  }, []);
+  }, [user, authLoading]);
 
   if (loading) {
     return (

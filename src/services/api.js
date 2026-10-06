@@ -1,10 +1,21 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dara-digital-backend.onrender.com/api';
+const isLocalhost =
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname === '0.0.0.0' ||
+    window.location.hostname.startsWith('192.168.') ||
+    window.location.hostname.startsWith('10.') ||
+    window.location.hostname.endsWith('.local'));
+
+const API_BASE_URL = isLocalhost
+  ? '/api'
+  : (import.meta.env.VITE_API_URL || 'https://dara-digital-backend.onrender.com/api');
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -23,6 +34,12 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('daramini_token');
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('daramini:unauthorized'));
+      }
+    }
     const errorData = error.response?.data?.error;
     const message = errorData?.message || error.message || 'Network error occurred.';
     return Promise.reject(new Error(message));

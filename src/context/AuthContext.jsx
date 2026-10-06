@@ -17,10 +17,25 @@ export function AuthProvider({ children }) {
       const res = await endpoints.getProfile();
       if (res.success && res.data) {
         setUser(res.data);
+        return res.data;
       }
+      return null;
     } catch (err) {
-      console.warn('Failed to load user profile:', err.message);
+      if (err.message !== 'Request aborted') {
+        console.warn('Failed to load user profile:', err.message);
+      }
+      throw err;
     }
+  }, []);
+
+  // Listen for unauthorized events to clear user session
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      setUser(null);
+      setToken(null);
+    };
+    window.addEventListener('daramini:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('daramini:unauthorized', handleUnauthorized);
   }, []);
 
   // Initialize Authentication
@@ -37,16 +52,33 @@ export function AuthProvider({ children }) {
             localStorage.setItem('daramini_token', res.data.token);
             setToken(res.data.token);
             setUser(res.data.user);
+            return;
           }
-        } else if (token) {
-          // If token already saved in local storage, fetch profile
-          await loadUserProfile();
-        } else {
-          // Fallback: auto-login with dev guest if in browser dev mode
+        }
+
+        // Check if existing token in localStorage is valid
+        const savedToken = localStorage.getItem('daramini_token');
+        if (savedToken) {
+          try {
+            const profile = await loadUserProfile();
+            if (profile && isMounted) {
+              setToken(savedToken);
+              return;
+            }
+          } catch (err) {
+            // Token invalid or expired
+            localStorage.removeItem('daramini_token');
+            if (isMounted) setToken(null);
+          }
+        }
+
+        // Fallback: auto-login with dev user in browser dev mode
+        if (isMounted) {
           const res = await endpoints.mockLogin({
-            telegramId: 123456789,
-            username: 'demo_user',
-            firstName: 'Demo Customer'
+            telegramId: 8361673413,
+            username: 'darazzdev',
+            firstName: 'Dara Admin',
+            roles: ['SUPER_ADMIN', 'ADMIN', 'USER']
           });
           if (res.success && isMounted) {
             localStorage.setItem('daramini_token', res.data.token);
@@ -55,7 +87,9 @@ export function AuthProvider({ children }) {
           }
         }
       } catch (err) {
-        console.warn('Auth initialization error:', err.message);
+        if (err.message !== 'Request aborted') {
+          console.warn('Auth initialization error:', err.message);
+        }
       } finally {
         if (isMounted) setLoading(false);
       }
