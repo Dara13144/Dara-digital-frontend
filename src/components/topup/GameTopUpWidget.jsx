@@ -181,8 +181,8 @@ export function GameTopUpWidget({ onDirectCheckout }) {
       {/* Header Banner */}
       <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-slate-800/80">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-500 to-rose-600 flex items-center justify-center shadow-lg shadow-pink-500/30 shrink-0">
-            <Zap className="w-6 h-6 text-white fill-white" />
+          <div className="w-12 h-12 rounded-2xl bg-[#1f0b18] border border-pink-500/50 flex items-center justify-center shadow-lg shadow-pink-500/30 shrink-0 p-1.5">
+            <img src="/icons/robux_gold.png" alt="Robux" className="w-full h-full object-contain animate-pulse" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -288,14 +288,19 @@ export function GameTopUpWidget({ onDirectCheckout }) {
                   >
                     {/* Discount or badge */}
                     {pkg.badge && (
-                      <span className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[9px] font-black border ${pkg.badgeColor}`}>
+                      <span className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[9px] font-black border flex items-center gap-1 ${pkg.badgeColor}`}>
+                        {pkg.popular && <img src="/icons/hot_flame.png" alt="HOT" className="w-2.5 h-2.5 object-contain" />}
                         {pkg.badge}
                       </span>
                     )}
 
                     <div className="space-y-1">
-                      <div className="w-8 h-8 rounded-xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-pink-400 group-hover:scale-110 transition-transform mb-2">
-                        <IconComponent className="w-4 h-4" />
+                      <div className="w-9 h-9 rounded-xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center p-1 group-hover:scale-110 transition-transform mb-2">
+                        {pkg.amount?.includes('R$') || pkg.name?.toLowerCase().includes('robux') ? (
+                          <img src="/icons/robux_gold.png" alt="Robux" className="w-full h-full object-contain drop-shadow" />
+                        ) : (
+                          <IconComponent className="w-4 h-4 text-pink-400" />
+                        )}
                       </div>
                       <p className="text-xs font-bold text-slate-300 line-clamp-1">{pkg.name}</p>
                       <p className="text-sm sm:text-base font-black text-white">{pkg.amount}</p>
