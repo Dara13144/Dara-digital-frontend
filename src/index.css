@@ -1,0 +1,295 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --app-height: 100vh;
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-top: env(safe-area-inset-top, 0px);
+}
+
+@layer base {
+  body {
+    background-color: #6a0013;
+    background-image:
+      radial-gradient(at 0% 0%, rgba(180, 15, 45, 0.45) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(225, 29, 72, 0.3) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, rgba(70, 0, 12, 0.7) 0px, transparent 50%),
+      linear-gradient(180deg, #780016 0%, #600011 50%, #46000c 100%);
+    background-attachment: fixed;
+    color: #f8fafc;
+    font-family: 'Inter', 'Battambang', sans-serif;
+    padding-top: var(--safe-area-top);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  html.light body {
+    background-color: #fff1f2;
+    background-image: linear-gradient(180deg, #ffe4e6 0%, #fff1f2 100%);
+    color: #881337;
+  }
+}
+
+/* Custom Glassmorphism & Cards */
+.glass-panel {
+  background: rgba(45, 3, 10, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(244, 63, 94, 0.22);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.light .glass-panel {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(225, 29, 72, 0.15);
+  box-shadow: 0 4px 20px 0 rgba(225, 29, 72, 0.08);
+}
+
+.glass-card {
+  background: rgba(60, 4, 14, 0.65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(244, 63, 94, 0.18);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.25);
+}
+
+.light .glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(254, 205, 211, 0.9);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Hide scrollbar for horizontal categories scroll while maintaining scrollability */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+/* Safe Area Inset Support for Telegram WebApp Mobile View */
+.safe-bottom-padding {
+  padding-bottom: calc(4.5rem + var(--safe-area-bottom));
+}
+
+/* Modern Micro-animations & Cyber Effects */
+.card-hover-effect {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.card-hover-effect:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px -6px rgba(6, 182, 212, 0.18), 0 0 15px -2px rgba(16, 185, 129, 0.12);
+}
+
+/* Shimmer Light Reflection Effect */
+.shimmer-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.08) 20%,
+    rgba(255, 255, 255, 0.2) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  animation: shimmer 2.8s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Glowing Neon Borders */
+.border-glow-cyan {
+  border-color: rgba(6, 182, 212, 0.4);
+  box-shadow: 0 0 15px -3px rgba(6, 182, 212, 0.35);
+}
+
+/* Button Click Scale Effect */
+.btn-interactive {
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.btn-interactive:active {
+  transform: scale(0.96);
+}
+
+/* Burning Flame & Electric Zap Animations */
+@keyframes flame-pulse {
+  0%, 100% {
+    transform: scale(1) rotate(-3deg);
+    filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.85)) drop-shadow(0 0 16px rgba(249, 115, 22, 0.6));
+  }
+  50% {
+    transform: scale(1.18) rotate(4deg);
+    filter: drop-shadow(0 0 14px rgba(244, 63, 94, 1)) drop-shadow(0 0 24px rgba(234, 179, 8, 0.9));
+  }
+}
+
+.animate-flame {
+  animation: flame-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes zap-flash {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+    filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.8));
+  }
+  50% {
+    transform: scale(1.15) translateY(-2px);
+    filter: drop-shadow(0 0 14px rgba(251, 191, 36, 1)) drop-shadow(0 0 22px rgba(245, 158, 11, 0.85));
+  }
+}
+
+.animate-zap {
+  animation: zap-flash 1.5s ease-in-out infinite;
+}
+
+/* Bottom Navigation Micro-Animations & Glows */
+@keyframes nav-pop {
+  0% {
+    transform: scale(0.85) translateY(2px);
+  }
+  50% {
+    transform: scale(1.22) translateY(-3px);
+  }
+  100% {
+    transform: scale(1.1) translateY(-1px);
+  }
+}
+
+@keyframes nav-glow-pulse {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.25);
+  }
+}
+
+@keyframes nav-indicator-slide {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.4);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+.animate-nav-active {
+  animation: nav-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-nav-glow {
+  animation: nav-glow-pulse 2.4s ease-in-out infinite;
+}
+
+.animate-nav-indicator {
+  animation: nav-indicator-slide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes float-subtle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.25;
+  }
+  100% {
+    transform: scale(0.92);
+    opacity: 0.8;
+  }
+}
+
+.animate-float-subtle {
+  animation: float-subtle 3s ease-in-out infinite;
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Animated HOT Badge with Neon Pulse & Glow */
+@keyframes hot-glow {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.75), 0 0 20px rgba(245, 158, 11, 0.45);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 16px rgba(251, 191, 36, 1), 0 0 28px rgba(245, 158, 11, 0.8);
+  }
+}
+
+@keyframes zap-wiggle {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.4));
+  }
+  25% {
+    transform: scale(1.25) rotate(-10deg);
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.9));
+  }
+  75% {
+    transform: scale(1.25) rotate(10deg);
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.9));
+  }
+}
+
+.animate-hot-badge {
+  animation: hot-glow 2s ease-in-out infinite;
+}
+
+.animate-zap-wiggle {
+  animation: zap-wiggle 1.4s ease-in-out infinite;
+}
+
+
