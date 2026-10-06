@@ -123,8 +123,8 @@ export function AdminLayout() {
         {/* Header */}
         <div className="h-16 px-4 flex items-center justify-between border-b border-slate-800/80">
           <Link to="/" className="flex items-center gap-2.5">
-            <img src="/maiser_logo.png" alt="Maiser Store" className="h-8 w-8 rounded-lg object-cover" />
-            <span className="font-black text-sm text-white">Maiser Store</span>
+            <img src="/maiser_logo.png" alt="𝑀𝑎𝑖𝑠𝑒𝑟 𝑆𝑡𝑜𝑟𝑒" className="h-8 w-8 rounded-lg object-cover ring-1 ring-pink-500/40" />
+            <span className="brand-text-animated font-bold text-sm sm:text-base tracking-wide select-none">𝑀𝑎𝑖𝑠𝑒𝑟 𝑆𝑡𝑜𝑟𝑒</span>
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}

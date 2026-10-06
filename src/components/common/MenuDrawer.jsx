@@ -96,8 +96,8 @@ export function MenuDrawer({ isOpen, onClose, onOpenTopUp }) {
         {/* Drawer Header */}
         <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
           <Link to="/" onClick={onClose} className="flex items-center gap-2.5">
-            <img src="/maiser_logo.png" alt="Maiser Store" className="h-9 w-9 rounded-xl object-cover shadow-sm" />
-            <span className="font-black text-base text-white tracking-wide">Maiser Store</span>
+            <img src="/maiser_logo.png" alt="𝑀𝑎𝑖𝑠𝑒𝑟 𝑆𝑡𝑜𝑟𝑒" className="h-9 w-9 rounded-xl object-cover shadow-sm ring-1 ring-pink-500/40" />
+            <span className="brand-text-animated font-bold text-base sm:text-lg tracking-wide select-none">𝑀𝑎𝑖𝑠𝑒𝑟 𝑆𝑡𝑜𝑟𝑒</span>
           </Link>
 
           <button

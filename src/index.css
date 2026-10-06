@@ -292,4 +292,46 @@
   animation: zap-wiggle 1.4s ease-in-out infinite;
 }
 
+/* Dazzling Animated Color Flow for Maiser Store Brand */
+@keyframes brand-color-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes brand-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.65)) drop-shadow(0 0 14px rgba(168, 85, 247, 0.45));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(236, 72, 153, 0.9)) drop-shadow(0 0 22px rgba(56, 189, 248, 0.7));
+  }
+}
+
+.brand-text-animated {
+  background: linear-gradient(
+    90deg,
+    #ff2e7e,
+    #ec4899,
+    #a855f7,
+    #38bdf8,
+    #2dd4bf,
+    #fbbf24,
+    #ff2e7e
+  );
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: brand-color-shift 4.5s ease infinite, brand-glow 3.5s ease-in-out infinite;
+  display: inline-block;
+  letter-spacing: 0.04em;
+}
+
 

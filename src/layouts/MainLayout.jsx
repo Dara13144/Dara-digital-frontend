@@ -22,7 +22,7 @@ export function MainLayout() {
       <footer className="hidden sm:block border-t border-slate-800/80 bg-slate-900/40 text-slate-400 text-xs py-8 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-200">Maiser Store</span>
+            <span className="brand-text-animated font-bold text-sm tracking-wide">𝑀𝑎𝑖𝑠𝑒𝑟 𝑆𝑡𝑜𝑟𝑒</span>
             <span>•</span>
             <span>Instant Telegram Mini App</span>
           </div>

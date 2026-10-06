@@ -49,11 +49,11 @@ export function Header() {
             <Link to="/" className="flex items-center gap-2 group py-0.5">
               <img
                 src="/maiser_logo.png"
-                alt="Maiser Store"
-                className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-cover transition-transform group-hover:scale-105 drop-shadow-md"
+                alt="𝑀𝑎𝑖𝑠𝑒𝑟 𝑆𝑡𝑜𝑟𝑒"
+                className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-cover transition-transform group-hover:scale-105 drop-shadow-md ring-1 ring-pink-500/40"
               />
-              <span className="font-black text-sm sm:text-base text-white tracking-wide">
-                Maiser Store
+              <span className="brand-text-animated font-bold text-base sm:text-lg tracking-wide select-none">
+                𝑀𝑎𝑖𝑠𝑒𝑟 𝑆𝑡𝑜𝑟𝑒
               </span>
             </Link>
           </div>

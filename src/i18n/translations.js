@@ -1,6 +1,6 @@
 export const translations = {
   en: {
-    appName: 'Maiser Store',
+    appName: '𝑀𝑎𝑖𝑠𝑒𝑟 𝑆𝑡𝑜𝑟𝑒',
     tagline: 'Instant Digital Products & Game Keys',
     nav: {
       home: 'Home',
@@ -113,7 +113,7 @@ export const translations = {
     }
   },
   km: {
-    appName: 'Maiser Store',
+    appName: '𝑀𝑎𝑖𝑠𝑒𝑟 𝑆𝑡𝑜𝑟𝑒',
     tagline: 'កូដហ្គេម និងផលិតផលឌីជីថលផ្ដល់ជូនភ្លាមៗ',
     nav: {
       home: 'ទំព័រដើម',
