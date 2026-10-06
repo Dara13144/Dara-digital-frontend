@@ -3,6 +3,8 @@ import { X, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+
 export function GoogleAuthModal() {
   const { isAuthModalOpen, closeAuthModal, loginWithGoogle, loading } = useAuth();
   const { t } = useLanguage();
@@ -13,10 +15,10 @@ export function GoogleAuthModal() {
     if (!isAuthModalOpen) return;
 
     // Initialize Google Identity Services if available
-    if (window.google?.accounts?.id && googleBtnRef.current) {
+    if (window.google?.accounts?.id) {
       try {
         window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '104719283746-mockgoogleoauthclientid.apps.googleusercontent.com',
+          client_id: GOOGLE_CLIENT_ID,
           callback: async (response) => {
             if (response?.credential) {
               setIsProcessing(true);
@@ -40,6 +42,58 @@ export function GoogleAuthModal() {
   const handleGoogleSignIn = async () => {
     setIsProcessing(true);
 
+    // 1. Try Google Identity Services OAuth 2.0 Token Client (Popup flow)
+    if (window.google?.accounts?.oauth2) {
+      try {
+        const tokenClient = window.google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: 'email profile openid',
+          callback: async (tokenResponse) => {
+            if (tokenResponse?.error) {
+              setIsProcessing(false);
+              if (tokenResponse.error !== 'popup_closed_by_user') {
+                console.warn('Google OAuth prompt error:', tokenResponse.error);
+              }
+              return;
+            }
+
+            if (tokenResponse?.access_token) {
+              try {
+                // Fetch verified profile from Google's userinfo endpoint
+                const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+                });
+                const profile = await userInfoRes.json();
+
+                const res = await loginWithGoogle({
+                  accessToken: tokenResponse.access_token,
+                  email: profile.email,
+                  name: profile.name,
+                  picture: profile.picture,
+                  sub: profile.sub
+                });
+
+                setIsProcessing(false);
+                if (res?.success) {
+                  closeAuthModal();
+                }
+                return;
+              } catch (fetchErr) {
+                console.error('Failed to get profile from Google userinfo:', fetchErr);
+              }
+            }
+            setIsProcessing(false);
+          }
+        });
+
+        tokenClient.requestAccessToken({ prompt: 'select_account' });
+        return;
+      } catch (err) {
+        console.warn('OAuth2 Token client initialization failed, falling back:', err.message);
+      }
+    }
+
+    // 2. Fallback to GIS prompt if available
     if (window.google?.accounts?.id) {
       try {
         window.google.accounts.id.prompt(async (notification) => {
@@ -60,6 +114,7 @@ export function GoogleAuthModal() {
       }
     }
 
+    // 3. Fallback direct sign-in for dev testing
     const res = await loginWithGoogle({
       email: 'customer@gmail.com',
       name: 'Google Customer',

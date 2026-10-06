@@ -14,7 +14,7 @@ export function GoogleAdminLogin({ onSuccess, fullWidth = false }) {
     if (window.google?.accounts?.id && googleBtnRef.current) {
       try {
         window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '104719283746-mockgoogleoauthclientid.apps.googleusercontent.com',
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
           callback: async (response) => {
             if (response?.credential) {
               setIsProcessing(true);
