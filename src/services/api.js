@@ -9,9 +9,24 @@ const isLocalhost =
     window.location.hostname.startsWith('10.') ||
     window.location.hostname.endsWith('.local'));
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  (isLocalhost ? 'http://localhost:5001/api' : 'https://dara-digital-backend.onrender.com/api');
+const normalizeApiUrl = (url) => {
+  if (!url) return '';
+  const trimmed = url.trim().replace(/\/+$/, '');
+  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+};
+
+const getApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl) {
+    return normalizeApiUrl(envUrl);
+  }
+  if (isLocalhost) {
+    return 'http://localhost:5001/api';
+  }
+  return 'https://dara-digital-backend.onrender.com/api';
+};
+
+export const API_BASE_URL = getApiBaseUrl();
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
