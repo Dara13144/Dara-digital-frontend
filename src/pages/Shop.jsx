@@ -22,7 +22,11 @@ import { useTelegram } from '../hooks/useTelegram.js';
 export function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState([
+    { id: '10000000-0000-0000-0000-000000000001', name: 'Bloxfruits', slug: 'bloxfruits', image_url: '/categories/bloxfruits.png' },
+    { id: '10000000-0000-0000-0000-000000000002', name: 'Fruits', slug: 'fruits', image_url: '/categories/fruits.png' },
+    { id: '10000000-0000-0000-0000-000000000003', name: 'Gamepass', slug: 'gamepass', image_url: '/categories/gamepass.png' }
+  ]);
   const [loading, setLoading] = useState(true);
 
   const initialSearch = searchParams.get('search') || '';
@@ -84,12 +88,15 @@ export function Shop() {
   }, [search, selectedCategory, selectedSort, stockType]);
 
   const categoryImageMap = {
-    'game-keys': '/categories/game-keys.png',
-    'gift-cards': '/categories/gift-cards.png',
-    'software-tools': '/categories/software-tools.png',
-    'subscriptions': '/categories/subscriptions.png',
-    'social-upgrades': '/categories/social-upgrades.png'
+    'bloxfruits': '/categories/bloxfruits.png',
+    'fruits': '/categories/fruits.png',
+    'gamepass': '/categories/gamepass.png'
   };
+
+  const categoryOrder = { 'bloxfruits': 1, 'fruits': 2, 'gamepass': 3 };
+  const visibleCategories = categories
+    .filter((c) => ['bloxfruits', 'fruits', 'gamepass'].includes(c.slug))
+    .sort((a, b) => (categoryOrder[a.slug] || 99) - (categoryOrder[b.slug] || 99));
 
   const handleCategorySelect = (slug) => {
     haptic('selection');
@@ -106,7 +113,7 @@ export function Shop() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('common.search')}
-            className="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-900 border border-slate-700/80 focus:border-emerald-500 text-sm text-slate-100 outline-none"
+            className="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-900 border border-slate-700/80 focus:border-pink-500 text-sm text-slate-100 outline-none"
           />
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
         </div>
@@ -151,53 +158,43 @@ export function Shop() {
         </div>
       </div>
 
-      {/* Category Pills Carousel with Rich 3D Transparent Icons */}
-      <div className="flex gap-2.5 overflow-x-auto pb-2 no-scrollbar">
+      {/* Category Pills Carousel matching user's design */}
+      <div className="flex gap-2.5 sm:gap-3 overflow-x-auto pb-2 no-scrollbar items-center">
+        {/* All Button */}
         <button
           onClick={() => handleCategorySelect('')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all card-hover-effect ${
+          className={`flex items-center justify-center px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200 active:scale-95 ${
             selectedCategory === ''
-              ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-glow-green font-black'
-              : 'glass-card text-slate-200 hover:text-white hover:border-emerald-500/40 bg-[#160206]/90 border-rose-950/70'
+              ? 'bg-[#181120] border-2 border-pink-500 text-white shadow-[0_0_14px_rgba(236,72,153,0.55),0_2px_8px_rgba(244,63,94,0.4)]'
+              : 'bg-[#131118]/90 border border-slate-800/80 text-slate-300 hover:text-white hover:border-slate-700'
           }`}
         >
-          <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
-            selectedCategory === '' ? 'bg-slate-950/20 text-slate-950' : 'bg-emerald-500/15 text-emerald-400'
-          }`}>
-            <Layers className="w-3.5 h-3.5" />
-          </div>
-          <span>{t('common.all')}</span>
+          <span>{t('common.all') || 'All'}</span>
         </button>
-        {categories.map((cat) => {
+
+        {visibleCategories.map((cat) => {
           const isSelected = selectedCategory === cat.slug;
           const displayName = lang === 'km' && cat.name_km ? cat.name_km : cat.name;
-          const Icon = getCategoryIcon(cat.icon);
-          const iconUrl = categoryImageMap[cat.slug];
+          const iconUrl = categoryImageMap[cat.slug] || cat.image_url;
           return (
             <button
               key={cat.id}
               onClick={() => handleCategorySelect(cat.slug)}
-              className={`flex items-center gap-2.5 px-3.5 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all card-hover-effect group ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200 active:scale-95 group ${
                 isSelected
-                  ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-glow-green'
-                  : 'glass-card text-slate-200 hover:text-white hover:border-emerald-500/40 bg-[#160206]/90 border-rose-950/70'
+                  ? 'bg-[#181120] border-2 border-pink-500 text-white shadow-[0_0_14px_rgba(236,72,153,0.55),0_2px_8px_rgba(244,63,94,0.4)]'
+                  : 'bg-[#131118]/90 border border-slate-800/80 text-slate-300 hover:text-white hover:border-slate-700'
               }`}
             >
-              <div className={`w-6 h-6 rounded-lg flex items-center justify-center p-0.5 ${
-                isSelected
-                  ? 'bg-slate-950/20'
-                  : 'bg-slate-900/90 border border-slate-800/80 group-hover:scale-110 transition-transform'
-              }`}>
-                {iconUrl ? (
+              {iconUrl && (
+                <div className="w-5 h-5 rounded-md overflow-hidden flex items-center justify-center shrink-0">
                   <img
                     src={iconUrl}
-                    alt=""
+                    alt={displayName}
                     className="w-full h-full object-contain"
                   />
-                ) : (
-                  <Icon className="w-3.5 h-3.5 text-emerald-400" />
-                )}
-              </div>
+                </div>
+              )}
               <span>{displayName}</span>
             </button>
           );
