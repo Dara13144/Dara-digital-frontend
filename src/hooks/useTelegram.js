@@ -1,4 +1,47 @@
 import { useEffect, useCallback } from 'react';
+let isTelegramInitialized = false;
+
+function initTelegramSdk(tg) {
+  if (!tg || isTelegramInitialized) return;
+  isTelegramInitialized = true;
+
+  try {
+    tg.ready?.();
+    tg.expand?.();
+
+    const isSupported = (ver) => {
+      try {
+        return typeof tg.isVersionAtLeast === 'function' ? tg.isVersionAtLeast(ver) : false;
+      } catch {
+        return false;
+      }
+    };
+
+    // Header & Background colors require v6.1+
+    if (isSupported('6.1')) {
+      if (typeof tg.setHeaderColor === 'function') {
+        tg.setHeaderColor('#600011');
+      }
+      if (typeof tg.setBackgroundColor === 'function') {
+        tg.setBackgroundColor('#46000c');
+      }
+    }
+
+    // Bottom bar color requires v7.10+
+    if (isSupported('7.10')) {
+      if (typeof tg.setBottomBarColor === 'function') {
+        tg.setBottomBarColor('#46000c');
+      }
+    }
+
+    // Closing confirmation requires v6.2+
+    if (isSupported('6.2') && typeof tg.enableClosingConfirmation === 'function') {
+      tg.enableClosingConfirmation();
+    }
+  } catch (err) {
+    // Silently ignore if running on web browser or older Telegram client
+  }
+}
 
 /**
  * Hook to interface with the official Telegram WebApp SDK
@@ -7,28 +50,7 @@ export function useTelegram() {
   const tg = typeof window !== 'undefined' ? window.Telegram?.WebApp : null;
 
   useEffect(() => {
-    if (tg) {
-      tg.ready();
-      tg.expand();
-      // Set theme colors to match the dark crimson wine background
-      try {
-        if (tg.setHeaderColor) {
-          tg.setHeaderColor('#600011');
-        }
-        if (tg.setBackgroundColor) {
-          tg.setBackgroundColor('#46000c');
-        }
-        if (tg.setBottomBarColor) {
-          tg.setBottomBarColor('#46000c');
-        }
-      } catch (e) {
-        // ignore if not supported by client
-      }
-      // Enable closing confirmation to prevent accidental swipes on mobile
-      if (tg.enableClosingConfirmation) {
-        tg.enableClosingConfirmation();
-      }
-    }
+    initTelegramSdk(tg);
   }, [tg]);
 
   const showMainButton = useCallback(
