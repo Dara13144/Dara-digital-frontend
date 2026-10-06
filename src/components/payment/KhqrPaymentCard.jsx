@@ -20,7 +20,7 @@ export function KhqrPaymentCard({
   checkoutUrl,
   amount,
   currency = 'USD',
-  merchantName = 'Dara Digital Store',
+  merchantName = 'Maiser Store',
   expiresAt,
   onPaid,
   onCancel

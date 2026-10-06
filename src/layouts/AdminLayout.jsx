@@ -122,8 +122,9 @@ export function AdminLayout() {
       >
         {/* Header */}
         <div className="h-16 px-4 flex items-center justify-between border-b border-slate-800/80">
-          <Link to="/" className="flex items-center gap-2">
-            <img src="/logo-light.png" alt="Dara Digital" className="h-7 w-auto object-contain" />
+          <Link to="/" className="flex items-center gap-2.5">
+            <img src="/maiser_logo.png" alt="Maiser Store" className="h-8 w-8 rounded-lg object-cover" />
+            <span className="font-black text-sm text-white">Maiser Store</span>
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -189,7 +190,7 @@ export function AdminLayout() {
               <Menu className="w-5 h-5" />
             </button>
             <h1 className="text-base sm:text-lg font-black text-slate-100">
-              Dara Digital Management System
+              Maiser Store Management System
             </h1>
           </div>
 

@@ -334,7 +334,7 @@ export function Checkout() {
             checkoutUrl={activePayment.checkoutUrl}
             amount={activePayment.amount}
             currency={activePayment.currency}
-            merchantName="Dara Digital Store"
+            merchantName="Maiser Store"
             expiresAt={activePayment.expiresAt}
             onPaid={handlePaymentSuccess}
             onCancel={() => setIsPaymentModalOpen(false)}

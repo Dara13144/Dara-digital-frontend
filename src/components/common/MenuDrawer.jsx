@@ -95,8 +95,9 @@ export function MenuDrawer({ isOpen, onClose, onOpenTopUp }) {
       <div className="relative w-full max-w-xs sm:max-w-sm h-full bg-slate-900/98 border-r border-slate-800 text-slate-100 flex flex-col z-10 shadow-2xl overflow-y-auto animate-in slide-in-from-left duration-300">
         {/* Drawer Header */}
         <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
-          <Link to="/" onClick={onClose} className="flex items-center gap-2">
-            <img src="/logo-light.png" alt="Dara Digital" className="h-8 w-auto object-contain" />
+          <Link to="/" onClick={onClose} className="flex items-center gap-2.5">
+            <img src="/maiser_logo.png" alt="Maiser Store" className="h-9 w-9 rounded-xl object-cover shadow-sm" />
+            <span className="font-black text-base text-white tracking-wide">Maiser Store</span>
           </Link>
 
           <button
@@ -295,7 +296,7 @@ export function MenuDrawer({ isOpen, onClose, onOpenTopUp }) {
           </div>
 
           <div className="text-center text-[10px] text-slate-400">
-            Dara Digital • Telegram Mini App v1.0
+            Maiser Store • Telegram Mini App v1.0
           </div>
         </div>
       </div>

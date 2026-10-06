@@ -5,9 +5,9 @@ import { useToast } from '../../context/ToastContext.jsx';
 
 export function AdminSettings() {
   const [settings, setSettings] = useState({
-    store_name: { en: 'Dara Digital Store', km: 'តារា ឌីជីថល ស្ត័រ' },
+    store_name: { en: 'Maiser Store', km: 'Maiser Store' },
     store_currency: 'USD',
-    support_telegram: '@DaraDigital_bot',
+    support_telegram: '@MaiserStore_bot',
     maintenance_mode: false,
     low_stock_threshold: 3,
     min_order_amount: 1.00,

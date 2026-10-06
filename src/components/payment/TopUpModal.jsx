@@ -180,7 +180,7 @@ export function TopUpModal({ isOpen, onClose, initialAmount = null, onSuccess })
               checkoutUrl={paymentData.checkoutUrl}
               amount={paymentData.amount}
               currency={paymentData.currency}
-              merchantName="Dara Digital Wallet Top-Up"
+              merchantName="Maiser Store Wallet Top-Up"
               expiresAt={paymentData.expiresAt}
               onPaid={handlePaymentSuccess}
               onCancel={() => setPaymentData(null)}

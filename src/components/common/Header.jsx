@@ -48,10 +48,13 @@ export function Header() {
             {/* Logo & Brand */}
             <Link to="/" className="flex items-center gap-2 group py-0.5">
               <img
-                src="/logo-light.png"
-                alt="Dara Digital"
-                className="h-8 sm:h-9 w-auto object-contain transition-transform group-hover:scale-105 drop-shadow-md"
+                src="/maiser_logo.png"
+                alt="Maiser Store"
+                className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-cover transition-transform group-hover:scale-105 drop-shadow-md"
               />
+              <span className="font-black text-sm sm:text-base text-white tracking-wide">
+                Maiser Store
+              </span>
             </Link>
           </div>
 
