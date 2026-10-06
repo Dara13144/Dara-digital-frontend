@@ -51,6 +51,7 @@ export const endpoints = {
   // Cart & Coupon
   calculateCart: (items, couponCode) => api.post('/cart/calculate', { items, couponCode }),
   validateCoupon: (code, subtotal) => api.post('/coupons/validate', { code, subtotal }),
+  getSettings: () => api.get('/settings'),
 
   // Orders
   checkout: (data) => api.post('/orders', data),
