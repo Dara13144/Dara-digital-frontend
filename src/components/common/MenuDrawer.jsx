@@ -243,28 +243,6 @@ export function MenuDrawer({ isOpen, onClose, onOpenTopUp }) {
 
         {/* Footer Preferences & Bot Link */}
         <div className="p-4 border-t border-slate-800 bg-slate-950/60 space-y-3">
-          {/* Telegram Bot Card */}
-          <a
-            href="https://t.me/DaraDigital_bot"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => haptic('medium')}
-            className="flex items-center justify-between p-2.5 rounded-xl bg-gradient-to-r from-sky-500/20 to-blue-500/20 border border-sky-500/30 hover:border-sky-400 text-slate-200 transition-all group"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center">
-                <Send className="w-4 h-4 fill-sky-400/20" />
-              </div>
-              <div className="text-left">
-                <p className="text-[11px] font-black text-slate-100 group-hover:text-sky-300 transition-colors">
-                  @DaraDigital_bot
-                </p>
-                <p className="text-[9px] text-sky-400 font-medium">Official Telegram Bot</p>
-              </div>
-            </div>
-            <ExternalLink className="w-3.5 h-3.5 text-sky-400 group-hover:translate-x-0.5 transition-transform" />
-          </a>
-
           <div className="grid grid-cols-2 gap-2">
             {/* Language Switch */}
             <button

@@ -133,40 +133,6 @@ export function Profile() {
         </div>
       </div>
 
-      {/* Official Verified Telegram Bot Card */}
-      <a
-        href="https://t.me/DaraDigital_bot"
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={() => haptic('medium')}
-        className="block p-4 rounded-3xl bg-gradient-to-r from-sky-500/15 via-slate-900/90 to-cyan-500/15 border border-sky-500/40 hover:border-sky-400 transition-all shadow-lg group active:scale-[0.99]"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-500/20 to-cyan-500/20 border border-sky-500/40 text-sky-400 flex items-center justify-center group-hover:scale-105 transition-transform shadow-md">
-              <Send className="w-5 h-5 fill-sky-400/20" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h4 className="text-xs font-black text-slate-100 group-hover:text-sky-300 transition-colors">
-                  Official Telegram Bot
-                </h4>
-                <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] font-black uppercase tracking-wider border border-emerald-500/40">
-                  Online 24/7
-                </span>
-              </div>
-              <p className="text-xs font-mono font-bold text-sky-400 mt-0.5">
-                @DaraDigital_bot
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-500/20 group-hover:bg-sky-500/30 text-sky-400 text-xs font-bold transition-all">
-            <span>Open Bot</span>
-            <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-          </div>
-        </div>
-      </a>
-
       {/* Prominent Admin Portal Banner (Only shown if user has Admin role) */}
       {isAdmin && (
         <Link

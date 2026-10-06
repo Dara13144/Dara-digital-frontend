@@ -124,7 +124,8 @@ export function useTelegram() {
     haptic,
     isTelegramWebApp: Boolean(tg?.initData && tg.initData.length > 0) || typeof window !== 'undefined' && Boolean(window.TelegramWebview),
     openTelegramApp: (startParam = 'store') => {
-      const url = `https://t.me/DaraDigital_bot?start=${startParam}`;
+      const botUsername = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || 'MaiserStore_bot';
+      const url = `https://t.me/${botUsername}?start=${startParam}`;
       if (tg?.openTelegramLink) {
         tg.openTelegramLink(url);
       } else if (typeof window !== 'undefined') {

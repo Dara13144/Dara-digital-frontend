@@ -295,17 +295,17 @@ export function OrderDetail() {
               <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold">24/7 Bot</span>
             </div>
             <p className="text-[11px] text-slate-400 mt-0.5">
-              Contact our official bot <span className="text-sky-400 font-mono font-bold">@DaraDigital_bot</span> for instant customer support.
+              Contact our official bot <span className="text-sky-400 font-mono font-bold">@MaiserStore_bot</span> for instant customer support.
             </p>
           </div>
         </div>
         <a
-          href="https://t.me/DaraDigital_bot"
+          href="https://t.me/MaiserStore_bot"
           target="_blank"
           rel="noopener noreferrer"
           className="w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-black text-xs transition-all active:scale-95 flex items-center justify-center gap-1.5 shadow-lg flex-shrink-0"
         >
-          <span>Open @DaraDigital_bot</span>
+          <span>Open @MaiserStore_bot</span>
           <ExternalLink className="w-3.5 h-3.5" />
         </a>
       </div>

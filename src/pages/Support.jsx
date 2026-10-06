@@ -37,13 +37,13 @@ export function Support() {
         </div>
 
         <a
-          href="https://t.me/DaraDigital_bot"
+          href="https://t.me/MaiserStore_bot"
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs shadow-lg transition-all active:scale-95"
         >
           <Send className="w-4 h-4" />
-          <span>Chat on Telegram (@DaraDigital_bot)</span>
+          <span>Chat on Telegram (@MaiserStore_bot)</span>
           <ExternalLink className="w-3.5 h-3.5" />
         </a>
       </div>
