@@ -128,6 +128,18 @@ export function AdminOrderDetail() {
             </p>
           </div>
         </div>
+
+        {/* Customer / Top-Up Notes */}
+        {order.customer_notes && (
+          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1">
+            <p className="text-[10px] font-black uppercase tracking-wider text-amber-400">
+              ⚡ Top-Up Target Account / Customer Notes
+            </p>
+            <p className="font-mono text-xs font-bold text-amber-100">
+              {order.customer_notes}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Purchased Items */}

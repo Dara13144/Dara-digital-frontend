@@ -7,7 +7,8 @@ import {
   Moon,
   Languages,
   Wallet,
-  Plus
+  Plus,
+  Zap
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useTheme } from '../../context/ThemeContext.jsx';
@@ -59,7 +60,16 @@ export function Header() {
           </div>
 
           {/* Right Action Icons */}
-          <div className="flex items-center gap-1.5 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
+            {/* Top-Up Quick Link */}
+            <Link
+              to="/topup"
+              onClick={() => haptic('light')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/40 text-pink-300 hover:text-white text-xs font-black shadow-sm transition-all active:scale-95 group"
+            >
+              <Zap className="w-3.5 h-3.5 text-pink-400 fill-pink-400 group-hover:scale-110 transition-transform" />
+              <span>Top-Up</span>
+            </Link>
             {user ? (
               <>
                 {/* Wallet Balance Chip */}

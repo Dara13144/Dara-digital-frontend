@@ -64,6 +64,7 @@ export function MenuDrawer({ isOpen, onClose, onOpenTopUp }) {
 
   const mainNavLinks = [
     { to: '/', label: lang === 'km' ? 'ទំព័រដើម' : 'Home', icon: Home, color: 'text-cyan-400' },
+    { to: '/topup', label: lang === 'km' ? 'បញ្ចូលលុយហ្គេម (Top-Up)' : 'Game & Robux Top-Up', icon: Zap, color: 'text-amber-400' },
     { to: '/shop', label: lang === 'km' ? 'ផលិតផលទាំងអស់' : 'All Products & Games', icon: Grid, color: 'text-sky-400' },
     { to: '/wallet', label: lang === 'km' ? 'កាបូបលុយ (Wallet)' : 'Wallet & Balance', icon: Wallet, color: 'text-teal-400' },
     { to: '/orders', label: lang === 'km' ? 'ការបញ្ជាទិញ & កូដឌីជីថល' : 'My Orders & Digital Keys', icon: Package, color: 'text-blue-400' },

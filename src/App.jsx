@@ -13,6 +13,7 @@ import { Orders } from './pages/Orders.jsx';
 import { OrderDetail } from './pages/OrderDetail.jsx';
 import { Profile } from './pages/Profile.jsx';
 import { Wallet } from './pages/Wallet.jsx';
+import { TopUp } from './pages/TopUp.jsx';
 import { Support } from './pages/Support.jsx';
 import { NotFound } from './pages/NotFound.jsx';
 
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="orders/:id" element={<OrderDetail />} />
         <Route path="profile" element={<Profile />} />
         <Route path="wallet" element={<Wallet />} />
+        <Route path="topup" element={<TopUp />} />
         <Route path="support" element={<Support />} />
       </Route>
 

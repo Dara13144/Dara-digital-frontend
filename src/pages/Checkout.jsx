@@ -33,8 +33,9 @@ export function Checkout() {
   const { haptic } = useTelegram();
   const navigate = useNavigate();
 
-  const [paymentMethod, setPaymentMethod] = useState('cutluy_khqr');
-  const [customerNotes, setCustomerNotes] = useState('');
+  const topUpNoteFromItems = items.find((i) => i.customerNotes)?.customerNotes || '';
+  const savedTopUpNote = typeof window !== 'undefined' ? (localStorage.getItem('daramini_topup_note') || '') : '';
+  const [customerNotes, setCustomerNotes] = useState(topUpNoteFromItems || savedTopUpNote);
   const [agreedTerms, setAgreedTerms] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
