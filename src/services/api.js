@@ -20,13 +20,11 @@ const getApiBaseUrl = () => {
   if (envUrl) {
     return normalizeApiUrl(envUrl);
   }
-  if (isLocalhost) {
-    return 'http://localhost:5001/api';
-  }
   return 'https://dara-digital-backend.onrender.com/api';
 };
 
 export const API_BASE_URL = getApiBaseUrl();
+export const BACKEND_BASE_URL = API_BASE_URL.replace(/\/api$/, '');
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
