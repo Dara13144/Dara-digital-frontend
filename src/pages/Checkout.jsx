@@ -60,7 +60,7 @@ export function Checkout() {
     );
   }
 
-  const userBalance = Number(user?.balance || 0);
+  const userBalance = Number(user?.wallet_balance ?? user?.balance ?? 0);
   const canPayWithWallet = userBalance >= finalTotal;
 
   const handleCheckoutSubmit = async (e) => {

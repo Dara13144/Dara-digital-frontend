@@ -78,7 +78,7 @@ export function KhqrPaymentCard({
             if (pollTimerRef.current) clearInterval(pollTimerRef.current);
             if (onPaid) {
               setTimeout(() => {
-                onPaid(res.data.order);
+                onPaid(res.data.order || res.data);
               }, 1500);
             }
           } else if (nextStatus === 'scanned') {

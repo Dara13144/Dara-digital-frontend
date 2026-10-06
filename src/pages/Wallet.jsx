@@ -62,7 +62,7 @@ export function Wallet() {
     await loadWalletData(true);
   };
 
-  const balance = Number(wallet?.balance || user?.balance || 0);
+  const balance = Number(wallet?.balance ?? user?.wallet_balance ?? user?.balance ?? 0);
 
   return (
     <div className="max-w-xl mx-auto space-y-6">

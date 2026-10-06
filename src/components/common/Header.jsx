@@ -25,7 +25,7 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [topUpOpen, setTopUpOpen] = useState(false);
 
-  const balance = Number(user?.balance || 0);
+  const balance = Number(user?.wallet_balance ?? user?.balance ?? 0);
 
   return (
     <>
