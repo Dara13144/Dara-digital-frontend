@@ -129,10 +129,19 @@ export function AuthProvider({ children }) {
     toast.success('Logged out successfully');
   };
 
+  const ADMIN_EMAILS = [
+    'darazzdev@gmail.com',
+    'admin@daradigital.store',
+    'bunrak778@gmail.com',
+    'finozzz377@gmail.com',
+    'mdara9695@gmail.com'
+  ];
+
+  const userEmail = user?.email ? user.email.toLowerCase() : '';
   const isAdmin = Boolean(
     (user?.username && user.username.toLowerCase() === 'darazzdev') ||
-    (user?.email && user.email.toLowerCase().includes('admin')) ||
-    (user?.email && user.email.toLowerCase().includes('darazzdev')) ||
+    (userEmail && ADMIN_EMAILS.includes(userEmail)) ||
+    (userEmail && (userEmail.includes('admin') || userEmail.includes('darazzdev'))) ||
     user?.roles?.some((r) => ['ADMIN', 'SUPER_ADMIN'].includes(r))
   );
 

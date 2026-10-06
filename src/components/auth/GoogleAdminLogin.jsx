@@ -38,6 +38,13 @@ export function GoogleAdminLogin({ onSuccess, fullWidth = false }) {
     }
   }, []);
 
+  const AUTHORIZED_ADMINS = [
+    'bunrak778@gmail.com',
+    'finozzz377@gmail.com',
+    'mdara9695@gmail.com',
+    'darazzdev@gmail.com'
+  ];
+
   const handleCustomGoogleLogin = async (emailToUse) => {
     setIsProcessing(true);
     const email = emailToUse || customEmail;
@@ -54,13 +61,57 @@ export function GoogleAdminLogin({ onSuccess, fullWidth = false }) {
     if (onSuccess) onSuccess();
   };
 
+  const handleAdminGoogleAuth = async () => {
+    setIsProcessing(true);
+
+    if (window.google?.accounts?.oauth2) {
+      try {
+        const tokenClient = window.google.accounts.oauth2.initTokenClient({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
+          scope: 'email profile openid',
+          callback: async (tokenResponse) => {
+            if (tokenResponse?.access_token) {
+              try {
+                const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+                });
+                const profile = await userInfoRes.json();
+                await loginWithGoogle({
+                  accessToken: tokenResponse.access_token,
+                  email: profile.email,
+                  name: profile.name,
+                  picture: profile.picture,
+                  sub: profile.sub
+                });
+                setIsProcessing(false);
+                if (onSuccess) onSuccess();
+                return;
+              } catch (fetchErr) {
+                console.error('Failed to get user profile from Google:', fetchErr);
+              }
+            }
+            setIsProcessing(false);
+          }
+        });
+
+        tokenClient.requestAccessToken({ prompt: 'select_account' });
+        return;
+      } catch (err) {
+        console.warn('Admin Google Token Client error:', err.message);
+      }
+    }
+
+    // Fallback to default admin
+    await handleCustomGoogleLogin('bunrak778@gmail.com');
+  };
+
   return (
     <div className="w-full space-y-3">
       {/* Primary Google Sign-In Button */}
       <button
         type="button"
         disabled={loading || isProcessing}
-        onClick={() => handleCustomGoogleLogin('darazzdev@gmail.com')}
+        onClick={handleAdminGoogleAuth}
         className={`relative flex items-center justify-center gap-3 px-5 py-3 rounded-2xl bg-white text-slate-900 hover:bg-slate-100 font-bold text-sm transition-all shadow-md hover:shadow-lg active:scale-98 border border-slate-200 disabled:opacity-50 ${
           fullWidth ? 'w-full' : 'w-full sm:w-auto'
         }`}
@@ -89,6 +140,24 @@ export function GoogleAdminLogin({ onSuccess, fullWidth = false }) {
         )}
         <span>Sign in with Google as Admin</span>
       </button>
+
+      {/* Authorized Admin Quick Select */}
+      <div className="pt-1">
+        <p className="text-[10px] text-slate-400 mb-1.5 text-center font-medium">Quick Select Authorized Admin:</p>
+        <div className="flex flex-wrap gap-1.5 justify-center">
+          {AUTHORIZED_ADMINS.map((email) => (
+            <button
+              key={email}
+              type="button"
+              disabled={isProcessing}
+              onClick={() => handleCustomGoogleLogin(email)}
+              className="text-[11px] px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 hover:border-cyan-400 text-slate-300 hover:text-cyan-300 font-mono transition-colors"
+            >
+              {email.split('@')[0]}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Embedded GIS Container if loaded */}
       <div ref={googleBtnRef} className="hidden" />

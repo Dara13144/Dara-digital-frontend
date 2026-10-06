@@ -161,7 +161,7 @@ export function AdminSettings() {
             </span>
           </div>
           <p className="text-[11px] text-slate-400">
-            Administrators can log into the management system with Google OAuth. Primary verified emails: <span className="font-mono text-cyan-400">darazzdev@gmail.com</span>, <span className="font-mono text-cyan-400">admin@daradigital.store</span>.
+            Administrators can log into the management system with Google OAuth. Authorized admin emails: <span className="font-mono text-cyan-400">bunrak778@gmail.com</span>, <span className="font-mono text-cyan-400">finozzz377@gmail.com</span>, <span className="font-mono text-cyan-400">mdara9695@gmail.com</span>, <span className="font-mono text-cyan-400">darazzdev@gmail.com</span>, <span className="font-mono text-cyan-400">admin@daradigital.store</span>.
           </p>
         </div>
 
