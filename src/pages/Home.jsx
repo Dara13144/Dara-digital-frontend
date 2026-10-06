@@ -75,31 +75,21 @@ export function Home() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Dynamic Animated Hero Video Banner */}
+      {/* Maiser Store Anime Hero Banner */}
       <Link
         to="/shop"
         onClick={() => haptic('medium')}
-        className="block relative rounded-3xl overflow-hidden border border-rose-500/40 hover:border-rose-500/70 shadow-2xl bg-slate-950 group active:scale-[0.99] transition-all"
+        className="block relative rounded-3xl overflow-hidden border border-pink-500/40 hover:border-pink-500/70 shadow-2xl bg-slate-950 group active:scale-[0.99] transition-all"
       >
-        <div className="relative overflow-hidden aspect-[16/9] sm:aspect-[21/9] max-h-[380px] w-full bg-slate-950">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            poster="/dara_hero.png"
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
-          >
-            <source src="/lucia_sword_duel.mp4" type="video/mp4" />
-            <img
-              src="/dara_hero.png"
-              alt="Lucia Sword Duel"
-              className="w-full h-full object-cover object-center"
-            />
-          </video>
+        <div className="relative overflow-hidden w-full aspect-[1024/409] max-h-[380px] bg-slate-950">
+          <img
+            src="/maiser_hero_banner.png"
+            alt="Maiser Store Hero Banner"
+            className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-500 ease-out"
+          />
 
           {/* Ambient Gradient Lighting */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
         </div>
       </Link>
 
