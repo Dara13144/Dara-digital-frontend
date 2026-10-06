@@ -10,22 +10,33 @@ import {
   TrendingUp,
   PackageCheck,
   ShieldAlert,
-  ArrowRight
+  ArrowRight,
+  Flame,
+  Clock,
+  Sparkles
 } from 'lucide-react';
 import { endpoints } from '../../services/api.js';
 import { Badge } from '../../components/common/Badge.jsx';
 
 export function AdminDashboard() {
   const [stats, setStats] = useState(null);
+  const [flashSale, setFlashSale] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadStats() {
       setLoading(true);
       try {
-        const res = await endpoints.admin.getDashboard();
-        if (res.success && res.data) {
-          setStats(res.data);
+        const [dashRes, settingsRes] = await Promise.allSettled([
+          endpoints.admin.getDashboard(),
+          endpoints.admin.getSettings()
+        ]);
+
+        if (dashRes.status === 'fulfilled' && dashRes.value?.success && dashRes.value.data) {
+          setStats(dashRes.value.data);
+        }
+        if (settingsRes.status === 'fulfilled' && settingsRes.value?.success && settingsRes.value.data) {
+          setFlashSale(settingsRes.value.data.flash_sale || null);
         }
       } catch (err) {
         console.error('Error fetching admin stats:', err);
@@ -139,6 +150,50 @@ export function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* Flash Sale Campaign Management Banner */}
+      <div className="p-5 rounded-2xl bg-gradient-to-r from-rose-950/40 via-orange-950/20 to-slate-900 border border-rose-500/30 shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="absolute top-0 right-0 w-80 h-full bg-gradient-to-l from-rose-500/10 to-transparent pointer-events-none" />
+        <div className="flex items-start sm:items-center gap-4 z-10">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-500 via-orange-500 to-amber-500 p-0.5 shadow-lg flex-shrink-0 flex items-center justify-center">
+            <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
+              <Flame className="w-6 h-6 text-rose-500 fill-rose-500 animate-pulse" />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-black uppercase tracking-wider text-rose-400">
+                {flashSale?.badge || '🔥 Flash Sale Campaign'}
+              </span>
+              <span
+                className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${
+                  flashSale?.enabled !== false
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                    : 'bg-slate-800 border-slate-700 text-slate-400'
+                }`}
+              >
+                {flashSale?.enabled !== false ? '● Live on Storefront' : '○ Paused'}
+              </span>
+            </div>
+            <h4 className="text-base font-black text-slate-100">
+              {flashSale?.title || 'Flash Sale & Hot Discounts'}
+            </h4>
+            <p className="text-xs text-slate-400 line-clamp-1">
+              {flashSale?.subtitle || 'Set special promotional prices, timer countdowns, and featured deals.'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 z-10">
+          <Link
+            to="/admin/flash-sale"
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 via-orange-600 to-amber-600 hover:from-rose-500 hover:via-orange-500 hover:to-amber-500 text-white font-bold text-xs shadow-lg shadow-rose-900/40 flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <span>Open Flash Sale Editor</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </div>
 
       {/* 7-Day Performance Chart Breakdown */}
       <div className="p-5 rounded-2xl glass-card border border-slate-800 space-y-4">

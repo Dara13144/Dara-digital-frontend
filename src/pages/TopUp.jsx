@@ -24,17 +24,6 @@ export function TopUp() {
               : 'Direct automated Robux, Beli, and game packages delivered instantly to your account with zero password needed.'}
           </p>
         </div>
-
-        <div className="flex sm:flex-col gap-2 shrink-0">
-          <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center sm:text-right">
-            <span className="text-[10px] text-slate-400 font-bold block">Avg Delivery</span>
-            <span className="text-sm font-black text-emerald-400">⚡ Under 2 Mins</span>
-          </div>
-          <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 text-center sm:text-right">
-            <span className="text-[10px] text-slate-400 font-bold block">Supported Banks</span>
-            <span className="text-sm font-black text-pink-400">ABA • Bakong KHQR</span>
-          </div>
-        </div>
       </div>
 
       {/* Main Interactive Top-Up Widget */}
@@ -46,9 +35,9 @@ export function TopUp() {
           <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-pink-400">
             <Zap className="w-5 h-5" />
           </div>
-          <h3 className="text-sm font-bold text-white">1. Enter Target Account</h3>
+          <h3 className="text-sm font-bold text-white">1. Verify Roblox Profile</h3>
           <p className="text-xs text-slate-400">
-            Provide your Roblox Username or Player ID. You never need to share your password or sensitive account details.
+            Enter your Roblox Username or Player ID. Our system checks and displays your avatar in real-time.
           </p>
         </div>
 

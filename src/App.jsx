@@ -29,6 +29,7 @@ import { AdminCategories } from './pages/admin/AdminCategories.jsx';
 import { AdminCoupons } from './pages/admin/AdminCoupons.jsx';
 import { AdminSettings } from './pages/admin/AdminSettings.jsx';
 import { AdminLogs } from './pages/admin/AdminLogs.jsx';
+import { AdminFlashSale } from './pages/admin/AdminFlashSale.jsx';
 
 export default function App() {
   return (
@@ -60,6 +61,7 @@ export default function App() {
         <Route path="users" element={<AdminUsers />} />
         <Route path="categories" element={<AdminCategories />} />
         <Route path="coupons" element={<AdminCoupons />} />
+        <Route path="flash-sale" element={<AdminFlashSale />} />
         <Route path="settings" element={<AdminSettings />} />
         <Route path="logs" element={<AdminLogs />} />
       </Route>

@@ -5,6 +5,15 @@ import { useLanguage } from '../../context/LanguageContext.jsx';
 export function StockBadge({ quantity, stockType }) {
   const { t } = useLanguage();
 
+  if (stockType === 'manual') {
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/40 px-2 py-0.5 rounded-full">
+        <CheckCircle2 className="w-3 h-3" />
+        <span>Instant Delivery</span>
+      </span>
+    );
+  }
+
   if (quantity > 3) {
     return (
       <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/40 px-2 py-0.5 rounded-full">

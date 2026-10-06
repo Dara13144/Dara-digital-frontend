@@ -243,6 +243,21 @@ export function OrderDetail() {
         </div>
       )}
 
+      {/* Customer Notes / Roblox Target */}
+      {order.customer_notes && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-950/30 via-slate-900 to-slate-900 border border-pink-500/30 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-wider text-pink-400 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-pink-400" />
+              <span>Target Account / Delivery Notes</span>
+            </span>
+          </div>
+          <p className="font-mono text-xs font-bold text-slate-100 break-words">
+            {order.customer_notes}
+          </p>
+        </div>
+      )}
+
       {/* Order Items Breakdown */}
       <div className="p-4 sm:p-5 rounded-2xl glass-card border border-slate-800 space-y-4">
         <h3 className="text-xs font-black uppercase tracking-wider text-slate-300">

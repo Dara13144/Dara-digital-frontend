@@ -8,7 +8,8 @@ import {
   ShieldAlert,
   User,
   CreditCard,
-  FileText
+  FileText,
+  ExternalLink
 } from 'lucide-react';
 import { endpoints } from '../../services/api.js';
 import { Badge } from '../../components/common/Badge.jsx';
@@ -130,16 +131,39 @@ export function AdminOrderDetail() {
         </div>
 
         {/* Customer / Top-Up Notes */}
-        {order.customer_notes && (
-          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1">
-            <p className="text-[10px] font-black uppercase tracking-wider text-amber-400">
-              ⚡ Top-Up Target Account / Customer Notes
-            </p>
-            <p className="font-mono text-xs font-bold text-amber-100">
-              {order.customer_notes}
-            </p>
-          </div>
-        )}
+        {order.customer_notes && (() => {
+          const robloxUsernameMatch = order.customer_notes.match(/@([a-zA-Z0-9_]+)/);
+          const robloxIdMatch = order.customer_notes.match(/ID:\s*(\d+)/i);
+          const robloxProfileUrl = robloxIdMatch
+            ? `https://www.roblox.com/users/${robloxIdMatch[1]}/profile`
+            : robloxUsernameMatch
+            ? `https://www.roblox.com/search/users?keyword=${robloxUsernameMatch[1]}`
+            : null;
+
+          return (
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-black uppercase tracking-wider text-amber-400">
+                  ⚡ Top-Up Target Account / Customer Notes
+                </p>
+                {robloxProfileUrl && (
+                  <a
+                    href={robloxProfileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pink-500/20 hover:bg-pink-500/30 border border-pink-500/40 text-pink-300 text-[11px] font-bold transition-all"
+                  >
+                    <span>Open Roblox Profile</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+              <p className="font-mono text-xs font-bold text-amber-100 break-words">
+                {order.customer_notes}
+              </p>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Purchased Items */}

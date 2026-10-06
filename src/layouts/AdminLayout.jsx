@@ -14,7 +14,8 @@ import {
   ArrowLeft,
   Menu,
   X,
-  ShieldCheck
+  ShieldCheck,
+  Flame
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useLanguage } from '../context/LanguageContext.jsx';
@@ -31,6 +32,7 @@ export function AdminLayout() {
   const navItems = [
     { to: '/admin', label: t('admin.dashboard'), icon: LayoutDashboard, end: true },
     { to: '/admin/products', label: t('admin.products'), icon: Package },
+    { to: '/admin/flash-sale', label: 'Flash Sale & Deals', icon: Flame },
     { to: '/admin/stock', label: t('admin.stock'), icon: Boxes },
     { to: '/admin/orders', label: t('admin.orders'), icon: ShoppingCart },
     { to: '/admin/payments', label: t('admin.payments'), icon: CreditCard },

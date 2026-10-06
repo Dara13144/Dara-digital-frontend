@@ -85,6 +85,9 @@ export const endpoints = {
   validateCoupon: (code, subtotal) => api.post('/coupons/validate', { code, subtotal }),
   getSettings: () => api.get('/settings'),
 
+  // Roblox
+  checkRobloxUser: (query) => api.get(`/roblox/check?username=${encodeURIComponent(query)}`),
+
   // Orders
   checkout: (data) => api.post('/orders', data),
   getMyOrders: (params) => api.get('/orders', { params }),

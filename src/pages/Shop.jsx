@@ -78,7 +78,16 @@ export function Shop() {
         }
 
         const res = await endpoints.getProducts(params);
-        if (res.success) setProducts(res.data.items);
+        if (res.success) {
+          const list = selectedCategory === 'topup'
+            ? res.data.items
+            : res.data.items.filter(
+                (p) => p.category?.slug !== 'topup' &&
+                       p.category_id !== '10000000-0000-0000-0000-000000000006' &&
+                       !p.name?.toLowerCase().includes('fast top-up')
+              );
+          setProducts(list);
+        }
       } catch (err) {
         console.error('Error fetching products:', err);
       } finally {

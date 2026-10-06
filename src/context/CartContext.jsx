@@ -48,6 +48,31 @@ export function CartProvider({ children }) {
         if (res.data.coupon) {
           setDiscountInfo(res.data.coupon);
         }
+
+        // Live Synchronize: Ensure every cart item strictly follows the latest database price
+        if (Array.isArray(res.data.items) && res.data.items.length > 0) {
+          setItems((prev) => {
+            let changed = false;
+            const updated = prev.map((local) => {
+              const matchedServer = res.data.items.find(
+                (si) => si.product_id === local.id || si.product_id === local.product_id
+              );
+              if (matchedServer) {
+                const livePrice = Number(matchedServer.unit_price);
+                if (Number(local.price) !== livePrice || (matchedServer.product_name && local.name !== matchedServer.product_name)) {
+                  changed = true;
+                  return {
+                    ...local,
+                    price: livePrice,
+                    name: matchedServer.product_name || local.name
+                  };
+                }
+              }
+              return local;
+            });
+            return changed ? updated : prev;
+          });
+        }
       }
     } catch (err) {
       // If coupon failed, reset coupon
@@ -61,14 +86,21 @@ export function CartProvider({ children }) {
     }
   }, [toast]);
 
-  const addToCart = (product, quantity = 1) => {
+  const addToCart = (product, quantity = 1, forceSetQty = false) => {
     haptic('medium');
+    const freshPrice = Number(product.discount_price !== null && product.discount_price !== undefined ? product.discount_price : product.price);
     setItems((prev) => {
       const existingIdx = prev.findIndex((i) => i.id === product.id);
       if (existingIdx !== -1) {
         const updated = [...prev];
-        const newQty = updated[existingIdx].quantity + quantity;
-        updated[existingIdx] = { ...updated[existingIdx], quantity: newQty };
+        const newQty = forceSetQty ? quantity : updated[existingIdx].quantity + quantity;
+        updated[existingIdx] = { 
+          ...updated[existingIdx], 
+          price: freshPrice,
+          name: product.name || updated[existingIdx].name,
+          customerNotes: product.customerNotes || updated[existingIdx].customerNotes,
+          quantity: newQty 
+        };
         return updated;
       } else {
         return [
@@ -77,9 +109,10 @@ export function CartProvider({ children }) {
             id: product.id,
             name: product.name,
             name_km: product.name_km,
-            price: product.price,
+            price: freshPrice,
             stock_type: product.stock_type,
             images: product.images,
+            customerNotes: product.customerNotes,
             quantity
           }
         ];
@@ -89,14 +122,16 @@ export function CartProvider({ children }) {
 
   const buyNow = (product, quantity = 1) => {
     haptic('medium');
+    const freshPrice = Number(product.discount_price !== null && product.discount_price !== undefined ? product.discount_price : product.price);
     const single = [
       {
         id: product.id,
         name: product.name,
         name_km: product.name_km,
-        price: product.price,
+        price: freshPrice,
         stock_type: product.stock_type,
         images: product.images,
+        customerNotes: product.customerNotes,
         quantity
       }
     ];

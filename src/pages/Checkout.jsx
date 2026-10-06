@@ -13,7 +13,9 @@ import {
   ExternalLink,
   Check,
   RefreshCw,
-  Plus
+  Plus,
+  Minus,
+  Trash2
 } from 'lucide-react';
 import { useCart } from '../context/CartContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -24,9 +26,10 @@ import { endpoints } from '../services/api.js';
 import { Modal } from '../components/common/Modal.jsx';
 import { KhqrPaymentCard } from '../components/payment/KhqrPaymentCard.jsx';
 import { TopUpModal } from '../components/payment/TopUpModal.jsx';
+import { RobloxUserChecker } from '../components/roblox/RobloxUserChecker.jsx';
 
 export function Checkout() {
-  const { items, finalTotal, subtotal, discountAmount, couponCode, clearCart } = useCart();
+  const { items, finalTotal, subtotal, discountAmount, couponCode, clearCart, removeFromCart, updateQuantity, serverCart } = useCart();
   const { user, refreshProfile, openAuthModal } = useAuth();
   const { lang, t } = useLanguage();
   const toast = useToast();
@@ -35,9 +38,41 @@ export function Checkout() {
 
   const topUpNoteFromItems = items.find((i) => i.customerNotes)?.customerNotes || '';
   const savedTopUpNote = typeof window !== 'undefined' ? (localStorage.getItem('daramini_topup_note') || '') : '';
-  const [customerNotes, setCustomerNotes] = useState(topUpNoteFromItems || savedTopUpNote);
+  const initialNote = topUpNoteFromItems || savedTopUpNote;
+  const [customerNotes, setCustomerNotes] = useState(initialNote);
   const [agreedTerms, setAgreedTerms] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('cutluy_khqr'); // 'cutluy_khqr' | 'wallet'
+
+  const [robloxInput, setRobloxInput] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('daramini_roblox_user');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        return parsed.username || '';
+      }
+    } catch (e) {}
+    if (initialNote) {
+      const match = initialNote.match(/@([a-zA-Z0-9_]+)/) || initialNote.match(/Roblox.*?: (.*?)(\||$)/i);
+      if (match) return match[1].trim();
+    }
+    return '';
+  });
+  const [verifiedRobloxUser, setVerifiedRobloxUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('daramini_roblox_user');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return null;
+  });
+
+  const hasRobloxItem = items.some((i) => 
+    i.customerNotes?.toLowerCase().includes('roblox') ||
+    i.name?.toLowerCase().includes('robux') ||
+    i.name?.toLowerCase().includes('blox') ||
+    i.name?.toLowerCase().includes('top-up') ||
+    i.categorySlug === 'topup'
+  ) || Boolean(robloxInput || verifiedRobloxUser);
 
   // Live KHQR Payment State
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -157,6 +192,144 @@ export function Checkout() {
       </div>
 
       <form onSubmit={handleCheckoutSubmit} className="space-y-5">
+        {/* Order Items Preview with Delete System */}
+        <div className="p-4 rounded-2xl glass-panel border border-slate-800 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-black uppercase tracking-wider text-slate-300">
+              Selected Items ({items.length})
+            </h3>
+            {items.length > 1 && (
+              <button
+                type="button"
+                onClick={() => {
+                  haptic('medium');
+                  if (window.confirm('Are you sure you want to clear all selected items?')) {
+                    clearCart();
+                  }
+                }}
+                className="text-[11px] font-bold text-rose-400 hover:text-rose-300 transition-colors flex items-center gap-1 cursor-pointer active:scale-95"
+                title="Clear all items"
+              >
+                <Trash2 className="w-3 h-3" />
+                <span>Clear All</span>
+              </button>
+            )}
+          </div>
+
+          <div className="divide-y divide-slate-800/60">
+            {items.map((item) => (
+              <div key={item.id} className="py-2.5 flex items-center justify-between text-xs gap-3 group">
+                <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                  <div className="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 overflow-hidden flex items-center justify-center p-1 shrink-0">
+                    <img
+                      src={item.image_url || '/categories/topup.png'}
+                      alt={item.name}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-slate-100 truncate">{item.name}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[11px] text-slate-400">Qty:</span>
+                      {/* Quantity Controls */}
+                      <div className="inline-flex items-center border border-slate-700/80 rounded-lg bg-slate-900/90 overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            haptic('light');
+                            updateQuantity(item.id, item.quantity - 1);
+                          }}
+                          className="px-1.5 py-0.5 text-slate-400 hover:text-white hover:bg-slate-800 text-[10px] transition-colors"
+                          title="Decrease quantity"
+                        >
+                          <Minus className="w-2.5 h-2.5" />
+                        </button>
+                        <span className="px-1.5 text-[10px] font-bold text-slate-200 min-w-[16px] text-center font-mono">
+                          {item.quantity}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            haptic('light');
+                            updateQuantity(item.id, item.quantity + 1);
+                          }}
+                          className="px-1.5 py-0.5 text-slate-400 hover:text-white hover:bg-slate-800 text-[10px] transition-colors"
+                          title="Increase quantity"
+                        >
+                          <Plus className="w-2.5 h-2.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 shrink-0">
+                  {(() => {
+                    const serverItem = serverCart?.items?.find((si) => si.product_id === item.id);
+                    const liveUnitPrice = serverItem ? Number(serverItem.unit_price) : Number(item.price);
+                    const lineTotal = liveUnitPrice * item.quantity;
+                    return (
+                      <span className="font-black text-emerald-400 text-sm">
+                        ${lineTotal.toFixed(2)}
+                      </span>
+                    );
+                  })()}
+                  {/* Delete Item Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      haptic('medium');
+                      removeFromCart(item.id);
+                    }}
+                    className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-slate-700/60 hover:border-rose-500/40 transition-all cursor-pointer active:scale-95"
+                    title={`Delete "${item.name}" from selected items`}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Roblox Account Delivery Verification */}
+        {hasRobloxItem && (
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#140e1b] border border-pink-500/40 shadow-[0_0_25px_rgba(236,72,153,0.15)] space-y-3">
+            <div className="flex items-center gap-2.5 pb-2 border-b border-slate-800/80">
+              <div className="w-8 h-8 rounded-xl bg-pink-500/20 border border-pink-500/40 flex items-center justify-center p-1 shadow-sm">
+                <img src="/icons/robux_gold.png" alt="Roblox" className="w-full h-full object-contain" />
+              </div>
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-2">
+                  <span>Roblox Delivery Target</span>
+                  <span className="px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 text-[10px] font-bold border border-pink-500/30">
+                    Live Check
+                  </span>
+                </h3>
+                <p className="text-[11px] text-slate-400">
+                  Enter and verify your Roblox username. Robux will be sent to this avatar.
+                </p>
+              </div>
+            </div>
+
+            <RobloxUserChecker
+              value={robloxInput}
+              onChange={(val) => {
+                setRobloxInput(val);
+                if (!val.trim()) {
+                  setCustomerNotes('');
+                }
+              }}
+              onVerified={(u) => {
+                setVerifiedRobloxUser(u);
+                if (u) {
+                  setCustomerNotes(`Roblox: ${u.displayName} (@${u.username}) | ID: ${u.id}`);
+                }
+              }}
+            />
+          </div>
+        )}
+
         {/* Payment Method Selection */}
         <div className="space-y-3">
           <label className="text-xs font-black uppercase tracking-wider text-slate-300">
