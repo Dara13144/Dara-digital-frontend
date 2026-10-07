@@ -204,6 +204,18 @@ export function AdminLayout() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              to="/topup?tab=gamepass"
+              target="_blank"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-500/15 via-pink-500/15 to-purple-500/15 border border-amber-500/30 hover:border-pink-500/60 text-amber-300 hover:text-white text-xs font-black transition-all group"
+              title="Open live GamePass storefront in new tab"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+              <span className="hidden md:inline">GamePass [HOT]</span>
+              <span className="text-[9px] px-1 py-0.2 rounded bg-amber-500/30 text-amber-100 font-black">
+                HOT
+              </span>
+            </Link>
             <span className="hidden sm:inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               API Online

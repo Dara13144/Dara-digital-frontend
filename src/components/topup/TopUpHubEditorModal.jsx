@@ -16,12 +16,13 @@ import {
   Flame,
   CheckCircle2
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-export function TopUpHubEditorModal({ isOpen, onClose, onRefreshRequired }) {
+export function TopUpHubEditorModal({ isOpen, onClose, onRefreshRequired, initialTab = 'all' }) {
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState('all'); // 'all' | 'gamepass' | 'robux'
+  const [activeTab, setActiveTab] = useState(initialTab || 'all'); // 'all' | 'gamepass' | 'robux'
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState(null);
 
@@ -50,9 +51,10 @@ export function TopUpHubEditorModal({ isOpen, onClose, onRefreshRequired }) {
 
   useEffect(() => {
     if (isOpen) {
+      if (initialTab) setActiveTab(initialTab);
       loadAllPackages();
     }
-  }, [isOpen]);
+  }, [isOpen, initialTab]);
 
   const handleOpenCreate = () => {
     setEditingPackage(null);
@@ -118,13 +120,23 @@ export function TopUpHubEditorModal({ isOpen, onClose, onRefreshRequired }) {
               </p>
             </div>
 
-            <button
-              onClick={handleOpenCreate}
-              className="px-3.5 py-2 rounded-xl bg-pink-500 hover:bg-pink-400 text-white font-black text-xs shadow-glow-pink flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add New Package</span>
-            </button>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Link
+                to="/topup?tab=gamepass"
+                target="_blank"
+                className="px-3 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-amber-300 hover:text-white border border-amber-500/40 text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shrink-0"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Live Store (/topup?tab=gamepass)</span>
+              </Link>
+              <button
+                onClick={handleOpenCreate}
+                className="px-3.5 py-2 rounded-xl bg-pink-500 hover:bg-pink-400 text-white font-black text-xs shadow-glow-pink flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add {activeTab === 'gamepass' ? 'GamePass' : 'Package'}</span>
+              </button>
+            </div>
           </div>
 
           {/* Search and Filter Tabs */}
@@ -144,14 +156,17 @@ export function TopUpHubEditorModal({ isOpen, onClose, onRefreshRequired }) {
               <button
                 type="button"
                 onClick={() => setActiveTab('gamepass')}
-                className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1 ${
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
                   activeTab === 'gamepass'
-                    ? 'bg-amber-500 text-slate-950 shadow-sm font-black'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-gradient-to-r from-amber-500 to-pink-500 text-white shadow-sm font-black'
+                    : 'text-amber-400/90 hover:text-white'
                 }`}
               >
-                <Sparkles className="w-3 h-3" />
+                <Sparkles className="w-3 h-3 text-amber-300" />
                 <span>GamePass</span>
+                <span className="px-1 py-0.2 rounded text-[9px] bg-amber-500/30 text-amber-100 font-black">
+                  HOT
+                </span>
               </button>
               <button
                 type="button"
@@ -303,6 +318,7 @@ export function TopUpHubEditorModal({ isOpen, onClose, onRefreshRequired }) {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         packageToEdit={editingPackage}
+        defaultType={activeTab === 'gamepass' ? 'gamepass' : 'robux'}
         onSaved={() => {
           loadAllPackages();
           if (onRefreshRequired) onRefreshRequired();

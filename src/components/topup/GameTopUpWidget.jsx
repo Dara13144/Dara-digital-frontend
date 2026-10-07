@@ -23,7 +23,6 @@ import { useLanguage } from '../../context/LanguageContext.jsx';
 import { useTelegram } from '../../hooks/useTelegram.js';
 import { endpoints } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
-import { TopUpPackageModal } from './TopUpPackageModal.jsx';
 import { RobloxUserChecker } from '../roblox/RobloxUserChecker.jsx';
 
 const DEFAULT_PACKAGES = [
@@ -326,10 +325,6 @@ export function GameTopUpWidget({ onDirectCheckout, initialTab = 'all' }) {
     }
   }, [initialTab]);
 
-  // Admin Edit Modal State
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [packageToEdit, setPackageToEdit] = useState(null);
-
   const { addToCart } = useCart();
   const { user, isAdmin } = useAuth();
   const { lang } = useLanguage();
@@ -506,23 +501,6 @@ export function GameTopUpWidget({ onDirectCheckout, initialTab = 'all' }) {
           </div>
         </div>
 
-        {/* Package Editor Action (Admin) */}
-        {isAdmin && (
-          <div className="flex items-center gap-2 self-start sm:self-auto">
-            <button
-              type="button"
-              onClick={() => {
-                setPackageToEdit(null);
-                setIsModalOpen(true);
-              }}
-              className="px-3.5 py-1.5 rounded-xl bg-pink-500/20 hover:bg-pink-500/30 border border-pink-500/40 text-pink-300 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
-              title="Add or Edit Top-Up Packages"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add Package</span>
-            </button>
-          </div>
-        )}
       </div>
 
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 pt-5">
@@ -704,23 +682,6 @@ export function GameTopUpWidget({ onDirectCheckout, initialTab = 'all' }) {
                 );
               })}
 
-              {/* Add Package Card (Admin only) */}
-              {isAdmin && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPackageToEdit(null);
-                    setIsModalOpen(true);
-                  }}
-                  className="p-3.5 sm:p-4 rounded-2xl border-2 border-dashed border-slate-800 hover:border-pink-500/60 bg-slate-900/30 hover:bg-slate-900/60 text-slate-400 hover:text-pink-400 flex flex-col items-center justify-center gap-2 transition-all min-h-[140px] group cursor-pointer"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-slate-800 group-hover:bg-pink-500/20 flex items-center justify-center transition-colors">
-                    <Plus className="w-5 h-5 text-slate-400 group-hover:text-pink-400" />
-                  </div>
-                  <span className="text-xs font-bold">Add Package</span>
-                  <span className="text-[10px] text-slate-500">To Store</span>
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -817,18 +778,6 @@ export function GameTopUpWidget({ onDirectCheckout, initialTab = 'all' }) {
         </div>
       </div>
 
-      {/* Admin Package Add / Edit Modal */}
-      {isAdmin && (
-        <TopUpPackageModal
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            setPackageToEdit(null);
-          }}
-          packageToEdit={packageToEdit}
-          onSaved={loadTopUpProducts}
-        />
-      )}
     </div>
   );
 }

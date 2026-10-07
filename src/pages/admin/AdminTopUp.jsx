@@ -16,13 +16,17 @@ import {
   ShieldCheck,
   CheckCircle2
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 export function AdminTopUp() {
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [filterTab, setFilterTab] = useState('all');
+  const [filterTab, setFilterTab] = useState(
+    tabParam === 'gamepass' ? 'gamepass' : tabParam === 'robux' ? 'robux' : 'all'
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [packageToEdit, setPackageToEdit] = useState(null);
 
@@ -119,14 +123,15 @@ export function AdminTopUp() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Link
-            to="/topup"
+            to="/topup?tab=gamepass"
             target="_blank"
-            className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-slate-600 text-slate-300 hover:text-white text-xs font-bold flex items-center gap-1.5 transition-all"
+            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500/20 via-pink-500/20 to-purple-500/20 border border-amber-500/40 hover:border-pink-500/60 text-amber-300 hover:text-white text-xs font-black flex items-center gap-1.5 transition-all shadow-sm active:scale-95 group"
           >
-            <ExternalLink className="w-3.5 h-3.5" />
-            <span>View Live Hub</span>
+            <Sparkles className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+            <span>View GamePass [HOT]</span>
+            <ExternalLink className="w-3.5 h-3.5 text-white/70" />
           </Link>
           <button
             onClick={handleOpenCreate}
@@ -188,14 +193,17 @@ export function AdminTopUp() {
           <button
             type="button"
             onClick={() => setFilterTab('gamepass')}
-            className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1 ${
+            className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
               filterTab === 'gamepass'
-                ? 'bg-amber-500 text-slate-950 font-black shadow-sm'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-gradient-to-r from-amber-500 to-pink-500 text-white shadow-sm font-black'
+                : 'text-amber-400/90 hover:text-white'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
             <span>Blox Fruits GamePass ({gamepassCount})</span>
+            <span className="px-1 py-0.2 rounded text-[9px] bg-amber-500/30 text-amber-100 font-black">
+              HOT
+            </span>
           </button>
           <button
             type="button"
@@ -361,6 +369,7 @@ export function AdminTopUp() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         packageToEdit={packageToEdit}
+        defaultType={filterTab === 'gamepass' ? 'gamepass' : 'robux'}
         onSaved={loadPackages}
       />
     </div>

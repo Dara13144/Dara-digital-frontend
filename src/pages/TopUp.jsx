@@ -1,19 +1,13 @@
-import React, { useState } from 'react';
-import { useSearchParams, useLocation, Link } from 'react-router-dom';
+import React from 'react';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import { GameTopUpWidget } from '../components/topup/GameTopUpWidget.jsx';
-import { TopUpHubEditorModal } from '../components/topup/TopUpHubEditorModal.jsx';
-import { ShieldCheck, Zap, Sparkles, CheckCircle2, Gamepad2, Settings, Plus, ExternalLink } from 'lucide-react';
+import { ShieldCheck, Zap, Sparkles, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext.jsx';
-import { useAuth } from '../context/AuthContext.jsx';
 
 export function TopUp() {
   const { lang } = useLanguage();
-  const { isAdmin } = useAuth();
   const [searchParams] = useSearchParams();
   const location = useLocation();
-
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const tabParam = searchParams.get('tab');
   const isGamepassRoute = location.pathname.includes('gamepass') || tabParam === 'gamepass';
@@ -51,58 +45,8 @@ export function TopUp() {
         </div>
       </div>
 
-      {/* Admin Quick System Editor Bar (Only visible to Store Admins) */}
-      {isAdmin && (
-        <div className="p-3 sm:p-4 rounded-2xl bg-gradient-to-r from-pink-950/40 via-slate-900 to-purple-950/40 border border-pink-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-pink-500/20 border border-pink-500/40 flex items-center justify-center text-pink-400 shrink-0">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black text-white">Roblox & Blox Fruits Hub Editor</span>
-                <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                  Admin Only
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400">
-                Manage packages, prices, badges, and upload custom images live without cluttering customer views.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 self-end sm:self-auto">
-            <button
-              type="button"
-              onClick={() => setIsEditorOpen(true)}
-              className="px-3.5 py-2 rounded-xl bg-pink-500 hover:bg-pink-400 text-white font-black text-xs shadow-glow-pink flex items-center gap-1.5 transition-all active:scale-95"
-            >
-              <Settings className="w-3.5 h-3.5" />
-              <span>Open System Editor</span>
-            </button>
-
-            <Link
-              to="/admin/topup"
-              className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
-            >
-              <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-              <span>Admin Hub</span>
-            </Link>
-          </div>
-        </div>
-      )}
-
       {/* Main Interactive Top-Up Widget */}
-      <GameTopUpWidget key={refreshKey} initialTab={initialTab} />
-
-      {/* Admin Hub Editor Modal */}
-      {isAdmin && (
-        <TopUpHubEditorModal
-          isOpen={isEditorOpen}
-          onClose={() => setIsEditorOpen(false)}
-          onRefreshRequired={() => setRefreshKey((k) => k + 1)}
-        />
-      )}
+      <GameTopUpWidget initialTab={initialTab} />
 
       {/* How It Works & Guarantees */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">

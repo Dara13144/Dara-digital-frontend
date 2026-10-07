@@ -7,7 +7,7 @@ import { Package, Trash2, Save, Sparkles, Zap, Gamepad2, AlertCircle } from 'luc
 
 const TOPUP_CATEGORY_ID = '10000000-0000-0000-0000-000000000006';
 
-export function TopUpPackageModal({ isOpen, onClose, packageToEdit, onSaved }) {
+export function TopUpPackageModal({ isOpen, onClose, packageToEdit, onSaved, defaultType = 'robux' }) {
   const [name, setName] = useState('');
   const [nameKm, setNameKm] = useState('');
   const [price, setPrice] = useState('');
@@ -33,21 +33,32 @@ export function TopUpPackageModal({ isOpen, onClose, packageToEdit, onSaved }) {
       setDescription(packageToEdit.productData?.description || '');
       setInstructions(packageToEdit.productData?.instructions || 'Please enter your Roblox Username or Player ID at checkout.');
       setFeatured(Boolean(packageToEdit.productData?.featured));
-      setPackageType(packageToEdit.isGamepass ? 'gamepass' : (packageToEdit.name?.toLowerCase().includes('blox') ? 'bloxfruits' : 'robux'));
-      setImageUrl(packageToEdit.productData?.images?.[0] || packageToEdit.image_url || (packageToEdit.isGamepass ? '/categories/gamepass.png' : '/categories/topup.png'));
+      setPackageType(
+        packageToEdit.isGamepass || packageToEdit.category?.slug === 'gamepass'
+          ? 'gamepass'
+          : packageToEdit.name?.toLowerCase().includes('blox')
+          ? 'bloxfruits'
+          : 'robux'
+      );
+      setImageUrl(
+        packageToEdit.productData?.images?.[0] ||
+        packageToEdit.images?.[0] ||
+        packageToEdit.image_url ||
+        (packageToEdit.isGamepass ? '/categories/gamepass.png' : '/categories/topup.png')
+      );
     } else {
       setName('');
       setNameKm('');
       setPrice('');
       setOriginalPrice('');
-      setBadge('Popular');
-      setPackageType('robux');
+      setBadge(defaultType === 'gamepass' ? 'Hot Deal' : 'Popular');
+      setPackageType(defaultType || 'robux');
       setDescription('');
       setInstructions('Please enter your Roblox Username or Player ID at checkout.');
       setFeatured(false);
-      setImageUrl('/categories/topup.png');
+      setImageUrl(defaultType === 'gamepass' ? '/categories/gamepass.png' : '/categories/topup.png');
     }
-  }, [packageToEdit, isOpen]);
+  }, [packageToEdit, isOpen, defaultType]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -177,7 +188,11 @@ export function TopUpPackageModal({ isOpen, onClose, packageToEdit, onSaved }) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={packageToEdit ? 'Edit Top-Up Package' : 'Add New Top-Up Package'}
+      title={
+        packageToEdit
+          ? (packageType === 'gamepass' ? '⚡ Edit GamePass [HOT] Package' : 'Edit Top-Up Package')
+          : (packageType === 'gamepass' ? '⚡ Add New GamePass [HOT] Package' : 'Add New Top-Up Package')
+      }
       maxWidth="max-w-xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4 pt-1">
@@ -186,7 +201,24 @@ export function TopUpPackageModal({ isOpen, onClose, packageToEdit, onSaved }) {
           <button
             type="button"
             onClick={() => {
+              setPackageType('gamepass');
+              setImageUrl('/categories/gamepass.png');
+              if (!name) setName('Blox Fruits GamePass');
+            }}
+            className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+              packageType === 'gamepass'
+                ? 'bg-gradient-to-r from-amber-500 to-pink-500 text-white shadow-lg shadow-amber-500/25 font-black'
+                : 'text-amber-400/80 hover:text-white'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            <span>GamePass [HOT]</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
               setPackageType('robux');
+              setImageUrl('/categories/topup.png');
               if (!name) setName('1,000 Robux Fast Top-Up');
             }}
             className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
@@ -202,6 +234,7 @@ export function TopUpPackageModal({ isOpen, onClose, packageToEdit, onSaved }) {
             type="button"
             onClick={() => {
               setPackageType('bloxfruits');
+              setImageUrl('/categories/bloxfruits.png');
               if (!name) setName('Blox Fruits 5M Beli + 15k Frag Pack');
             }}
             className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
