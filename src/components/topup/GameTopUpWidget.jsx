@@ -15,7 +15,9 @@ import {
   Info,
   Plus,
   Settings,
-  Clock
+  Clock,
+  Camera,
+  Upload
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -24,6 +26,7 @@ import { useTelegram } from '../../hooks/useTelegram.js';
 import { endpoints } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import { RobloxUserChecker } from '../roblox/RobloxUserChecker.jsx';
+import { QuickImageUploadModal } from './QuickImageUploadModal.jsx';
 
 const DEFAULT_PACKAGES = [
   // --- GamePass Packages (Blox Fruits & Roblox) ---
@@ -38,6 +41,7 @@ const DEFAULT_PACKAGES = [
     badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
     discount: '-23%',
     icon: Sparkles,
+    image_url: null,
     popular: true,
     isGamepass: true,
     isBlox: true
@@ -53,6 +57,7 @@ const DEFAULT_PACKAGES = [
     badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
     discount: '-23%',
     icon: Flame,
+    image_url: null,
     popular: true,
     isGamepass: true,
     isBlox: true
@@ -68,6 +73,7 @@ const DEFAULT_PACKAGES = [
     badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
     discount: '-19%',
     icon: Zap,
+    image_url: null,
     popular: true,
     isGamepass: true,
     isBlox: true
@@ -83,6 +89,7 @@ const DEFAULT_PACKAGES = [
     badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
     discount: '-20%',
     icon: Gamepad2,
+    image_url: null,
     popular: false,
     isGamepass: true,
     isBlox: true
@@ -94,10 +101,11 @@ const DEFAULT_PACKAGES = [
     amount: '2x Drops',
     price: 3.99,
     originalPrice: 5.00,
-    badge: 'Special',
-    badgeColor: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
+    badge: 'Starter',
+    badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
     discount: '-20%',
     icon: Sparkles,
+    image_url: 'https://ghstmiubmmfogscpohek.supabase.co/storage/v1/object/public/images/topup/topup_1791369869520_d3c48517.jpg',
     popular: false,
     isGamepass: true,
     isBlox: true
@@ -107,12 +115,13 @@ const DEFAULT_PACKAGES = [
     name: '+1 Fruit Storage (+1 Capacity)',
     name_km: 'GamePass +1 Fruit Storage',
     amount: '+1 Storage',
-    price: 4.50,
+    price: 2.99,
     originalPrice: 5.50,
     badge: 'Best Value',
     badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
     discount: '-18%',
     icon: Sparkles,
+    image_url: 'https://ghstmiubmmfogscpohek.supabase.co/storage/v1/object/public/images/topup/topup_1791367441974_5a3c629a.jpg',
     popular: true,
     isGamepass: true,
     isBlox: true
@@ -122,12 +131,13 @@ const DEFAULT_PACKAGES = [
     name: 'Fruit Notifier GamePass',
     name_km: 'GamePass Fruit Notifier',
     amount: 'Notifier',
-    price: 27.99,
+    price: 13.99,
     originalPrice: 32.00,
     badge: 'VIP / Ultra',
     badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
     discount: '-13%',
     icon: Flame,
+    image_url: 'https://ghstmiubmmfogscpohek.supabase.co/storage/v1/object/public/images/topup/topup_1791371516852_c441396a.jpg',
     popular: true,
     isGamepass: true,
     isBlox: true
@@ -384,6 +394,7 @@ export function GameTopUpWidget({ onDirectCheckout, initialTab = 'all' }) {
             badgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
           }
 
+          const rawImage = prod.images?.[0] || prod.image_url || null;
           return {
             id: prod.id,
             name: prod.name,
@@ -395,6 +406,8 @@ export function GameTopUpWidget({ onDirectCheckout, initialTab = 'all' }) {
             badgeColor,
             discount: prod.discount_price ? `-${Math.round((1 - prod.discount_price / prod.price) * 100)}%` : null,
             icon: isGamepass ? Sparkles : isBlox ? Gamepad2 : Zap,
+            image_url: rawImage,
+            images: prod.images && prod.images.length > 0 ? prod.images : (rawImage ? [rawImage] : []),
             popular: badge === 'Popular' || badge === 'Best Value' || isGamepass,
             isBlox,
             isGamepass,
@@ -405,7 +418,23 @@ export function GameTopUpWidget({ onDirectCheckout, initialTab = 'all' }) {
         // Merge with DEFAULT_PACKAGES so predefined gamepasses remain present
         const mergedMap = new Map();
         DEFAULT_PACKAGES.forEach((p) => mergedMap.set(p.id, p));
-        mapped.forEach((p) => mergedMap.set(p.id, p));
+        mapped.forEach((p) => {
+          const existing = mergedMap.get(p.id);
+          if (existing) {
+            mergedMap.set(p.id, {
+              ...existing,
+              ...p,
+              image_url: (p.image_url && p.image_url !== '/categories/gamepass.png' && p.image_url !== '/categories/topup.png')
+                ? p.image_url
+                : (existing.image_url || p.image_url),
+              images: (p.images && p.images.length > 0 && p.images[0] !== '/categories/gamepass.png')
+                ? p.images
+                : (existing.images || p.images)
+            });
+          } else {
+            mergedMap.set(p.id, p);
+          }
+        });
         const mergedList = Array.from(mergedMap.values());
 
         setPackages(mergedList);
@@ -418,6 +447,18 @@ export function GameTopUpWidget({ onDirectCheckout, initialTab = 'all' }) {
     } catch (err) {
       // Fall back to defaults
     }
+  };
+
+  const [uploadModalPkg, setUploadModalPkg] = useState(null);
+
+  const handleImageUpdated = (updatedPkg) => {
+    setPackages((prev) =>
+      prev.map((p) => (p.id === updatedPkg.id ? { ...p, ...updatedPkg } : p))
+    );
+    if (selectedPkg?.id === updatedPkg.id) {
+      setSelectedPkg((prev) => ({ ...prev, ...updatedPkg }));
+    }
+    loadTopUpProducts();
   };
 
   useEffect(() => {
@@ -440,11 +481,17 @@ export function GameTopUpWidget({ onDirectCheckout, initialTab = 'all' }) {
       ? `Roblox Player: ${robloxUser.displayName} (@${robloxUser.username}) | ID: ${robloxUser.id} | Package: ${activePkg.name}${deliveryTag}`
       : `Roblox Player / ID: ${trimmedId} | Package: ${activePkg.name}${deliveryTag}`;
 
+    const pkgImg =
+      activePkg.image_url ||
+      activePkg.images?.[0] ||
+      activePkg.productData?.images?.[0] ||
+      (activePkg.isGamepass ? '/categories/gamepass.png' : (robloxUser?.avatarUrl || '/categories/topup.png'));
+
     const itemToAdd = {
       id: activePkg.id,
       name: activePkg.name,
       price: freshPrice,
-      image_url: activePkg.isGamepass ? '/categories/gamepass.png' : (robloxUser?.avatarUrl || '/categories/topup.png'),
+      image_url: pkgImg,
       stock_type: 'manual',
       categorySlug: activePkg.isGamepass ? 'gamepass' : 'topup',
       customerNotes: note
@@ -644,8 +691,19 @@ export function GameTopUpWidget({ onDirectCheckout, initialTab = 'all' }) {
                     )}
 
                     <div className="space-y-1 mt-1">
-                      <div className="w-9 h-9 rounded-xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center p-1 group-hover:scale-110 transition-transform mb-2">
-                        {pkg.isGamepass ? (
+                      {/* Image Preview / Icon Box */}
+                      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-slate-950/90 border border-pink-500/30 flex items-center justify-center p-1 group-hover:scale-105 transition-all mb-2 relative overflow-hidden shadow-[0_0_12px_rgba(236,72,153,0.15)]">
+                        {pkg.image_url && pkg.image_url !== '/categories/gamepass.png' && pkg.image_url !== '/categories/topup.png' ? (
+                          <img
+                            src={pkg.image_url}
+                            alt={pkg.name}
+                            className="w-full h-full object-contain rounded-lg drop-shadow group-hover:scale-110 transition-transform duration-300"
+                            loading="lazy"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                        ) : pkg.isGamepass ? (
                           <Sparkles className="w-5 h-5 text-amber-400" />
                         ) : pkg.amount?.includes('R$') || pkg.name?.toLowerCase().includes('robux') ? (
                           <img src="/icons/robux_gold.png" alt="Robux" className="w-full h-full object-contain drop-shadow" />
@@ -698,7 +756,16 @@ export function GameTopUpWidget({ onDirectCheckout, initialTab = 'all' }) {
             <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-400">Package:</span>
-                <span className="font-bold text-white text-right">{selectedPkg?.name || 'Select package'}</span>
+                <div className="flex items-center gap-2 max-w-[65%] justify-end">
+                  {selectedPkg?.image_url && selectedPkg.image_url !== '/categories/gamepass.png' && selectedPkg.image_url !== '/categories/topup.png' && (
+                    <img
+                      src={selectedPkg.image_url}
+                      alt={selectedPkg.name}
+                      className="w-5 h-5 rounded-md object-contain bg-slate-950 border border-slate-800 shrink-0"
+                    />
+                  )}
+                  <span className="font-bold text-white text-right truncate">{selectedPkg?.name || 'Select package'}</span>
+                </div>
               </div>
               <div className="flex justify-between items-start text-xs gap-2">
                 <span className="text-slate-400 shrink-0">Delivery Target:</span>
@@ -778,6 +845,13 @@ export function GameTopUpWidget({ onDirectCheckout, initialTab = 'all' }) {
         </div>
       </div>
 
+      {/* Quick Image Upload Modal */}
+      <QuickImageUploadModal
+        isOpen={Boolean(uploadModalPkg)}
+        onClose={() => setUploadModalPkg(null)}
+        targetPackage={uploadModalPkg}
+        onImageUpdated={handleImageUpdated}
+      />
     </div>
   );
 }

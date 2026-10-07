@@ -255,6 +255,42 @@ export function AdminProducts() {
     }
   };
 
+  const isGamepassProduct = (p) =>
+    p.category?.slug === 'gamepass' ||
+    p.category_id === '10000000-0000-0000-0000-000000000003' ||
+    p.name?.toLowerCase().includes('gamepass');
+
+  const isRobuxProduct = (p) =>
+    (p.category?.slug === 'topup' ||
+      p.category_id === '10000000-0000-0000-0000-000000000006' ||
+      p.name?.toLowerCase().includes('robux') ||
+      p.name?.toLowerCase().includes('top-up')) &&
+    !isGamepassProduct(p);
+
+  const isDigitalProduct = (p) =>
+    !isGamepassProduct(p) && !isRobuxProduct(p);
+
+  const gamepassCount = products.filter(isGamepassProduct).length;
+  const robuxCount = products.filter(isRobuxProduct).length;
+  const digitalCount = products.filter(isDigitalProduct).length;
+
+  const displayedProducts = products.filter((p) => {
+    const q = (search || '').toLowerCase().trim();
+    const matchesSearch =
+      !q ||
+      p.name?.toLowerCase().includes(q) ||
+      p.name_km?.toLowerCase().includes(q) ||
+      p.slug?.toLowerCase().includes(q) ||
+      p.id?.toLowerCase().includes(q);
+
+    if (!matchesSearch) return false;
+
+    if (activeFilter === 'gamepass') return isGamepassProduct(p);
+    if (activeFilter === 'robux') return isRobuxProduct(p);
+    if (activeFilter === 'digital') return isDigitalProduct(p);
+    return true;
+  });
+
   return (
     <div className="space-y-5">
       {/* Header */}

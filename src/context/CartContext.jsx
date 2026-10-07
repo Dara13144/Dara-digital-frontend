@@ -59,12 +59,18 @@ export function CartProvider({ children }) {
               );
               if (matchedServer) {
                 const livePrice = Number(matchedServer.unit_price);
-                if (Number(local.price) !== livePrice || (matchedServer.product_name && local.name !== matchedServer.product_name)) {
+                const liveImg = matchedServer.image_url || local.image_url;
+                if (
+                  Number(local.price) !== livePrice ||
+                  (matchedServer.product_name && local.name !== matchedServer.product_name) ||
+                  (matchedServer.image_url && local.image_url !== matchedServer.image_url)
+                ) {
                   changed = true;
                   return {
                     ...local,
                     price: livePrice,
-                    name: matchedServer.product_name || local.name
+                    name: matchedServer.product_name || local.name,
+                    image_url: liveImg
                   };
                 }
               }
