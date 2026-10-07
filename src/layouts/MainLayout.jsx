@@ -3,6 +3,7 @@ import { Outlet, Link } from 'react-router-dom';
 import { Header } from '../components/common/Header.jsx';
 import { BottomNav } from '../components/common/BottomNav.jsx';
 import { GoogleAuthModal } from '../components/auth/GoogleAuthModal.jsx';
+import { TelegramChatSupport } from '../components/common/TelegramChatSupport.jsx';
 import { Shield, Zap, Heart, MessageCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext.jsx';
 
@@ -40,7 +41,15 @@ export function MainLayout() {
           </div>
 
           <div className="text-slate-400">
-            Powered by ABA PayWay & Supabase
+            Dev by{' '}
+            <a
+              href="https://t.me/darazzdev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-pink-400 hover:text-pink-300 font-bold transition-colors hover:underline"
+            >
+              @darazzdev
+            </a>
           </div>
         </div>
       </footer>
@@ -50,6 +59,9 @@ export function MainLayout() {
 
       {/* Global Google Authentication & Registration Modal */}
       <GoogleAuthModal />
+
+      {/* Floating 24/7 Telegram Chat Support Button */}
+      <TelegramChatSupport />
     </div>
   );
 }

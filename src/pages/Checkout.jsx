@@ -15,7 +15,8 @@ import {
   RefreshCw,
   Plus,
   Minus,
-  Trash2
+  Trash2,
+  Clock
 } from 'lucide-react';
 import { useCart } from '../context/CartContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -68,11 +69,20 @@ export function Checkout() {
 
   const hasRobloxItem = items.some((i) => 
     i.customerNotes?.toLowerCase().includes('roblox') ||
+    i.customerNotes?.toLowerCase().includes('gamepass') ||
     i.name?.toLowerCase().includes('robux') ||
     i.name?.toLowerCase().includes('blox') ||
+    i.name?.toLowerCase().includes('gamepass') ||
     i.name?.toLowerCase().includes('top-up') ||
-    i.categorySlug === 'topup'
+    i.categorySlug === 'topup' ||
+    i.categorySlug === 'gamepass'
   ) || Boolean(robloxInput || verifiedRobloxUser);
+
+  const hasGamepassItem = items.some((i) =>
+    i.customerNotes?.toLowerCase().includes('gamepass') ||
+    i.name?.toLowerCase().includes('gamepass') ||
+    i.categorySlug === 'gamepass'
+  );
 
   // Live KHQR Payment State
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -112,6 +122,18 @@ export function Checkout() {
       return;
     }
 
+    let finalNotes = customerNotes.trim();
+    if (!finalNotes && verifiedRobloxUser) {
+      finalNotes = `Roblox: ${verifiedRobloxUser.displayName} (@${verifiedRobloxUser.username}) | ID: ${verifiedRobloxUser.id}`;
+    } else if (!finalNotes && robloxInput.trim()) {
+      finalNotes = `Roblox Username: ${robloxInput.trim()}`;
+    }
+
+    if (hasRobloxItem && !finalNotes) {
+      toast.warning(lang === 'km' ? 'សូមបញ្ចូល និងផ្ទៀងផ្ទាត់ Roblox Username មុនពេលបង់ប្រាក់!' : 'Please enter and verify your Roblox Username before checking out!');
+      return;
+    }
+
     setIsSubmitting(true);
     haptic('medium');
 
@@ -124,7 +146,7 @@ export function Checkout() {
         })),
         couponCode: couponCode || undefined,
         paymentMethod: paymentMethod === 'wallet' ? 'wallet' : 'cutluy_khqr',
-        customerNotes: customerNotes.trim() || undefined
+        customerNotes: finalNotes || undefined
       };
 
       const orderRes = await endpoints.checkout(orderPayload);
@@ -327,6 +349,30 @@ export function Checkout() {
                 }
               }}
             />
+          </div>
+        )}
+
+        {/* GamePass 1 Hour - 24 Hours Delivery Notice */}
+        {hasGamepassItem && (
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-slate-900 to-amber-950/30 border border-amber-500/40 flex items-center justify-between gap-3 text-xs shadow-md">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center shrink-0">
+                <Clock className="w-4 h-4 animate-pulse" />
+              </div>
+              <div>
+                <span className="font-black text-amber-300">
+                  GamePass Delivery Window: 1 - 24 Hours
+                </span>
+                <p className="text-[11px] text-slate-300 mt-0.5">
+                  {lang === 'km'
+                    ? 'កញ្ចប់ GamePass នឹងត្រូវបញ្ជូនទៅគណនី Roblox របស់អ្នកក្នុងចន្លោះពេលពី ១ ម៉ោង ទៅ ២៤ ម៉ោង។'
+                    : 'Your GamePass will be gifted directly to your verified Roblox profile within 1 to 24 hours.'}
+                </p>
+              </div>
+            </div>
+            <span className="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 font-mono font-black text-xs shrink-0 border border-amber-500/40">
+              1h - 24h
+            </span>
           </div>
         )}
 

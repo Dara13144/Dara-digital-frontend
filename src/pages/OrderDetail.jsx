@@ -10,7 +10,9 @@ import {
   ArrowLeft,
   PackageCheck,
   MessageCircle,
-  HelpCircle
+  HelpCircle,
+  Clock,
+  Sparkles
 } from 'lucide-react';
 import { endpoints } from '../services/api.js';
 import { Badge } from '../components/common/Badge.jsx';
@@ -111,6 +113,10 @@ export function OrderDetail() {
 
   const isCompleted = order.status === 'COMPLETED';
   const isStockError = order.status === 'STOCK_ERROR';
+  const isGamepassOrder = Boolean(
+    order.customer_notes?.toLowerCase().includes('gamepass') ||
+    order.items?.some((it) => (it.product_name || '').toLowerCase().includes('gamepass'))
+  );
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -138,8 +144,62 @@ export function OrderDetail() {
         </Badge>
       </div>
 
+      {/* GamePass 1h - 24h Delivery Status Banner */}
+      {isGamepassOrder && (
+        <div className="p-5 rounded-3xl bg-gradient-to-r from-purple-950/70 via-slate-900 to-amber-950/50 border-2 border-amber-500/50 shadow-2xl space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+              <Clock className="w-6 h-6 animate-pulse" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm font-black text-white">
+                  🎮 GamePass Delivery Status: In Progress
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                  ⏱️ 1h - 24h Delivery Window
+                </span>
+              </div>
+              <p className="text-xs text-amber-200/90 font-medium mt-0.5">
+                {lang === 'km'
+                  ? 'ការបញ្ជូន GamePass នឹងត្រូវបញ្ចប់ក្នុងចន្លោះពេលពី ១ ម៉ោង ទៅ ២៤ ម៉ោង ដោយផ្ទាល់ទៅកាន់គណនី Roblox របស់អ្នក។'
+                  : 'GamePass delivery is scheduled and will be sent to your Roblox account within 1 to 24 hours.'}
+              </p>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 text-xs space-y-2 text-slate-300">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400">Target Roblox Player:</span>
+              <span className="font-mono font-bold text-emerald-400">{order.customer_notes || 'Verified Player'}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400">Delivery Window:</span>
+              <span className="font-bold text-amber-300 font-mono">1 Hour - 24 Hours (១ ម៉ោង - ២៤ ម៉ោង)</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400">Delivery Method:</span>
+              <span className="text-slate-200">Roblox Official Gift / Trade Transfer</span>
+            </div>
+          </div>
+
+          <div className="text-[11px] text-slate-400 flex items-center justify-between pt-1">
+            <span>Need assistance? Contact our 24/7 Telegram support:</span>
+            <a
+              href="https://t.me/rybunrak"
+              target="_blank"
+              rel="noreferrer"
+              className="text-pink-400 font-bold hover:underline flex items-center gap-1"
+            >
+              <span>@rybunrak</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        </div>
+      )}
+
       {/* Success banner if completed */}
-      {isCompleted && (
+      {isCompleted && !isGamepassOrder && (
         <div className="p-5 rounded-3xl bg-gradient-to-r from-emerald-950/60 to-slate-900 border border-emerald-500/40 text-center space-y-2">
           <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
             <PackageCheck className="w-6 h-6" />
@@ -310,17 +370,17 @@ export function OrderDetail() {
               <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold">24/7 Bot</span>
             </div>
             <p className="text-[11px] text-slate-400 mt-0.5">
-              Contact our official bot <span className="text-sky-400 font-mono font-bold">@MaiserStore_bot</span> for instant customer support.
+              Contact our official support <span className="text-sky-400 font-mono font-bold">@rybunrak</span> for instant customer support.
             </p>
           </div>
         </div>
         <a
-          href="https://t.me/MaiserStore_bot"
+          href="https://t.me/rybunrak"
           target="_blank"
           rel="noopener noreferrer"
           className="w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-black text-xs transition-all active:scale-95 flex items-center justify-center gap-1.5 shadow-lg flex-shrink-0"
         >
-          <span>Open @MaiserStore_bot</span>
+          <span>Chat @rybunrak</span>
           <ExternalLink className="w-3.5 h-3.5" />
         </a>
       </div>

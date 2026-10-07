@@ -9,18 +9,34 @@ import {
   Eye,
   CheckCircle2,
   XCircle,
-  Search
+  Search,
+  Sparkles,
+  Clock,
+  Flame,
+  Gamepad2,
+  Settings,
+  ExternalLink,
+  Zap
 } from 'lucide-react';
 import { endpoints } from '../../services/api.js';
 import { Modal } from '../../components/common/Modal.jsx';
 import { Badge } from '../../components/common/Badge.jsx';
+import { ImageUploader } from '../../components/common/ImageUploader.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
+import { TopUpHubEditorModal } from '../../components/topup/TopUpHubEditorModal.jsx';
+import { TopUpPackageModal } from '../../components/topup/TopUpPackageModal.jsx';
 
 export function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'gamepass' | 'robux' | 'digital'
+
+  // GamePass System Editor modals
+  const [isGamepassEditorOpen, setIsGamepassEditorOpen] = useState(false);
+  const [isGamepassPackageModalOpen, setIsGamepassPackageModalOpen] = useState(false);
+  const [gamepassPackageToEdit, setGamepassPackageToEdit] = useState(null);
 
   // Form Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,12 +69,47 @@ export function AdminProducts() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [prodRes, catRes] = await Promise.all([
+      const [prodRes, catRes, gamepassRes, topupRes] = await Promise.allSettled([
         endpoints.admin.getProducts({ search, limit: 100 }),
-        endpoints.getCategories()
+        endpoints.getCategories(),
+        endpoints.getProducts({ categorySlug: 'gamepass', limit: 100 }),
+        endpoints.getProducts({ categorySlug: 'topup', limit: 100 })
       ]);
-      if (prodRes.success) setProducts(prodRes.data.items);
-      if (catRes.success) setCategories(catRes.data);
+
+      const baseItems = prodRes.status === 'fulfilled' && prodRes.value?.success && Array.isArray(prodRes.value.data?.items)
+        ? prodRes.value.data.items
+        : [];
+      const gamepassItems = gamepassRes.status === 'fulfilled' && gamepassRes.value?.success && Array.isArray(gamepassRes.value.data?.items)
+        ? gamepassRes.value.data.items
+        : [];
+      const topupItems = topupRes.status === 'fulfilled' && topupRes.value?.success && Array.isArray(topupRes.value.data?.items)
+        ? topupRes.value.data.items
+        : [];
+
+      // Merge and deduplicate by id
+      const itemMap = new Map();
+      baseItems.forEach((it) => itemMap.set(it.id, it));
+      gamepassItems.forEach((it) => {
+        if (!itemMap.has(it.id)) {
+          itemMap.set(it.id, {
+            ...it,
+            stock_type: 'manual',
+            category: { slug: 'gamepass', name: 'GamePass' }
+          });
+        }
+      });
+      topupItems.forEach((it) => {
+        if (!itemMap.has(it.id)) {
+          itemMap.set(it.id, {
+            ...it,
+            stock_type: 'manual',
+            category: { slug: 'topup', name: 'Top-Up' }
+          });
+        }
+      });
+
+      setProducts(Array.from(itemMap.values()));
+      if (catRes.status === 'fulfilled' && catRes.value?.success) setCategories(catRes.value.data);
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -227,17 +278,128 @@ export function AdminProducts() {
         </button>
       </div>
 
-      {/* Search Filter */}
-      <div className="relative max-w-sm">
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Filter products..."
-          className="w-full h-10 pl-9 pr-4 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-100 outline-none focus:border-emerald-500"
-        />
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      {/* Filter Tabs & Search Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {/* Category Tabs */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+          <button
+            type="button"
+            onClick={() => setActiveFilter('all')}
+            className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+              activeFilter === 'all'
+                ? 'bg-slate-800 text-white border border-slate-700 shadow-sm'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+            }`}
+          >
+            <span>All Products ({products.length})</span>
+          </button>
+
+          {/* Exact GamePass (X) HOT Button */}
+          <button
+            type="button"
+            onClick={() => setActiveFilter('gamepass')}
+            className={`px-3.5 py-1.5 rounded-xl font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
+              activeFilter === 'gamepass'
+                ? 'bg-gradient-to-r from-amber-500 to-pink-500 text-white shadow-lg shadow-pink-500/25 ring-2 ring-pink-500/50 scale-[1.02]'
+                : 'bg-amber-500/10 text-amber-300 border border-amber-500/30 hover:bg-amber-500/20'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            <span>GamePass ({gamepassCount})</span>
+            <span className="text-[9px] px-1 py-0.2 rounded bg-amber-500/30 text-amber-200 font-black">HOT</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveFilter('robux')}
+            className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all flex items-center gap-1 cursor-pointer ${
+              activeFilter === 'robux'
+                ? 'bg-pink-500 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5" />
+            <span>Robux ({robuxCount})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveFilter('digital')}
+            className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all flex items-center gap-1 cursor-pointer ${
+              activeFilter === 'digital'
+                ? 'bg-slate-800 text-white border border-slate-700'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+            }`}
+          >
+            <Boxes className="w-3.5 h-3.5" />
+            <span>Digital Keys ({digitalCount})</span>
+          </button>
+        </div>
+
+        {/* Search Input */}
+        <div className="relative max-w-xs sm:w-64">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search products..."
+            className="w-full h-9 pl-8 pr-3 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-100 outline-none focus:border-emerald-500"
+          />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+        </div>
       </div>
+
+      {/* GamePass System Editor Helper Bar */}
+      {activeFilter === 'gamepass' && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-950/40 via-purple-950/30 to-slate-900 border border-amber-500/40 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+              <Sparkles className="w-5 h-5 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-xs font-black text-white">Roblox & Blox Fruits GamePass System Editor</h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                  ⏱️ 1h - 24h Delivery Window
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-300 mt-0.5">
+                Manage GamePass packages, live prices, custom images, and automated Telegram bot delivery reporting.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsGamepassEditorOpen(true)}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-pink-500 hover:from-amber-400 hover:to-pink-400 text-white font-black text-xs shadow-glow-pink flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              <span>Open System Editor</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setGamepassPackageToEdit(null);
+                setIsGamepassPackageModalOpen(true);
+              }}
+              className="px-3.5 py-2 rounded-xl bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 border border-pink-500/40 font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add Package</span>
+            </button>
+            <Link
+              to="/topup?tab=gamepass"
+              target="_blank"
+              className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-xs font-bold flex items-center gap-1 transition-all"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>View Hub</span>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Products Table */}
       <div className="glass-card rounded-2xl border border-slate-800 overflow-hidden">
@@ -248,86 +410,131 @@ export function AdminProducts() {
                 <th className="py-3 px-4">Product</th>
                 <th className="py-3 px-4">Price</th>
                 <th className="py-3 px-4">Type</th>
-                <th className="py-3 px-4">Stock</th>
+                <th className="py-3 px-4">Stock / Delivery</th>
                 <th className="py-3 px-4">Status</th>
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
-              {products.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-900/40">
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={p.images?.[0] || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600'}
-                        alt={p.name}
-                        className="w-10 h-10 rounded-lg object-contain p-0.5 bg-slate-950 border border-slate-800"
-                      />
-                      <div>
-                        <p className="font-bold text-slate-100 line-clamp-1">{p.name}</p>
-                        <p className="text-[10px] text-slate-400">{p.slug}</p>
+              {displayedProducts.map((p) => {
+                const isGp = p.category?.slug === 'gamepass' || p.name?.toLowerCase().includes('gamepass');
+
+                return (
+                  <tr key={p.id} className="hover:bg-slate-900/40">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={
+                            p.images?.[0] ||
+                            (isGp
+                              ? '/categories/gamepass.png'
+                              : p.image_url ||
+                                'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600')
+                          }
+                          alt={p.name}
+                          className="w-10 h-10 rounded-lg object-contain p-0.5 bg-slate-950 border border-slate-800"
+                        />
+                        <div>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <p className="font-bold text-slate-100 line-clamp-1">{p.name}</p>
+                            {isGp && (
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                                GamePass
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-slate-400">{p.slug || p.id}</p>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="font-bold text-emerald-400">
-                      ${Number(p.price).toFixed(2)}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 uppercase font-bold text-[10px] text-slate-300">
-                    {p.stock_type}
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                      <Link
-                        to={`/admin/stock?product=${p.id}`}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-[11px]"
-                      >
-                        <Boxes className="w-3 h-3 text-emerald-400" />
-                        <span>{p.stock_quantity || 0} in stock</span>
-                      </Link>
-                      <button
-                        onClick={() => handleOpenQuickStock(p)}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 font-bold text-[11px] border border-emerald-500/30"
-                        title="Add Stock / Accounts"
-                      >
-                        <Plus className="w-3 h-3" />
-                        <span>Add Stock</span>
-                      </button>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <Badge variant={p.published ? 'success' : 'default'}>
-                      {p.published ? 'Published' : 'Draft'}
-                    </Badge>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <button
-                        onClick={() => handleOpenQuickStock(p)}
-                        className="p-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold text-xs"
-                        title="Quick Add Stock"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleOpenEdit(p)}
-                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
-                        title="Edit"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(p.id, p.name)}
-                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-rose-400"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="font-bold text-emerald-400">
+                        ${Number(p.price).toFixed(2)}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 uppercase font-bold text-[10px] text-slate-300">
+                      {isGp ? (
+                        <span className="text-amber-400">Manual / Trade</span>
+                      ) : (
+                        p.stock_type
+                      )}
+                    </td>
+                    <td className="py-3 px-4">
+                      {isGp ? (
+                        <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-bold">
+                          <Clock className="w-3.5 h-3.5 text-amber-400" />
+                          <span>1h - 24h Delivery</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Link
+                            to={`/admin/stock?product=${p.id}`}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-[11px]"
+                          >
+                            <Boxes className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>{p.stock_quantity || 0} in stock</span>
+                          </Link>
+                          <button
+                            onClick={() => handleOpenQuickStock(p)}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 font-bold text-[11px] border border-emerald-500/30"
+                            title="Add Stock / Accounts"
+                          >
+                            <Plus className="w-3 h-3" />
+                            <span>Add Stock</span>
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                    <td className="py-3 px-4">
+                      <Badge variant={p.published !== false ? 'success' : 'default'}>
+                        {p.published !== false ? 'Published' : 'Draft'}
+                      </Badge>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {!isGp && (
+                          <button
+                            onClick={() => handleOpenQuickStock(p)}
+                            className="p-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold text-xs"
+                            title="Quick Add Stock"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            if (isGp) {
+                              setGamepassPackageToEdit({
+                                ...p,
+                                isGamepass: true,
+                                productData: p
+                              });
+                              setIsGamepassPackageModalOpen(true);
+                            } else {
+                              handleOpenEdit(p);
+                            }
+                          }}
+                          className={`p-1.5 rounded-lg text-slate-300 ${
+                            isGp
+                              ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40'
+                              : 'bg-slate-800 hover:bg-slate-700'
+                          }`}
+                          title={isGp ? 'Edit GamePass Package' : 'Edit'}
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(p.id, p.name)}
+                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-rose-400"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -406,15 +613,17 @@ export function AdminProducts() {
             />
           </div>
 
-          <div>
-            <label className="font-bold text-slate-300 block mb-1">Image URLs (One per line)</label>
-            <textarea
-              rows={2}
-              value={formData.images}
-              onChange={(e) => setFormData({ ...formData, images: e.target.value })}
-              className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-100 outline-none font-mono"
-            />
-          </div>
+          <ImageUploader
+            value={formData.images}
+            onChange={(val) => {
+              const str = Array.isArray(val) ? val.join('\n') : (val || '');
+              setFormData({ ...formData, images: str });
+            }}
+            folder="products"
+            multiple={true}
+            label="Product Images"
+            helperText="Drag & drop or browse PNG, JPG, WebP up to 10MB. Images are saved to cloud CDN."
+          />
 
           <div>
             <label className="font-bold text-slate-300 block mb-1">Description (EN)</label>
@@ -585,6 +794,24 @@ export function AdminProducts() {
           </div>
         </form>
       </Modal>
+
+      {/* GamePass & Top-Up Hub System Editor Modal */}
+      <TopUpHubEditorModal
+        isOpen={isGamepassEditorOpen}
+        onClose={() => setIsGamepassEditorOpen(false)}
+        onRefreshRequired={loadData}
+      />
+
+      {/* GamePass Individual Package Add / Edit Modal */}
+      <TopUpPackageModal
+        isOpen={isGamepassPackageModalOpen}
+        onClose={() => {
+          setIsGamepassPackageModalOpen(false);
+          setGamepassPackageToEdit(null);
+        }}
+        packageToEdit={gamepassPackageToEdit}
+        onSaved={loadData}
+      />
     </div>
   );
 }

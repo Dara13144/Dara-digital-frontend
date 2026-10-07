@@ -113,19 +113,30 @@ export function Orders() {
                     {new Date(order.created_at).toLocaleDateString()}
                   </span>
                 </div>
-                <Badge
-                  variant={
-                    isCompleted
-                      ? 'success'
-                      : order.status === 'STOCK_ERROR'
-                      ? 'danger'
-                      : order.status.includes('CANCEL')
-                      ? 'danger'
-                      : 'warning'
-                  }
-                >
-                  {order.status}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  {Boolean(
+                    order.customer_notes?.toLowerCase().includes('gamepass') ||
+                    order.items?.some((it) => (it.product_name || '').toLowerCase().includes('gamepass'))
+                  ) && (
+                    <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-bold flex items-center gap-1">
+                      <Clock className="w-2.5 h-2.5 text-amber-400" />
+                      <span>1h - 24h</span>
+                    </span>
+                  )}
+                  <Badge
+                    variant={
+                      isCompleted
+                        ? 'success'
+                        : order.status === 'STOCK_ERROR'
+                        ? 'danger'
+                        : order.status.includes('CANCEL')
+                        ? 'danger'
+                        : 'warning'
+                    }
+                  >
+                    {order.status}
+                  </Badge>
+                </div>
               </div>
 
               {/* Items summary */}

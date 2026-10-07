@@ -8,7 +8,8 @@ import {
   Languages,
   Wallet,
   Plus,
-  Zap
+  Zap,
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useTheme } from '../../context/ThemeContext.jsx';
@@ -61,9 +62,23 @@ export function Header() {
 
           {/* Right Action Icons */}
           <div className="flex items-center gap-1.5 sm:gap-2.5">
-            {/* Top-Up Quick Link */}
+            {/* Top-Up GamePass Menu Button */}
             <Link
-              to="/topup"
+              to="/topup?tab=gamepass"
+              onClick={() => haptic('light')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-pink-500/20 to-purple-500/20 border border-amber-500/40 hover:border-pink-500/60 text-amber-300 hover:text-white text-xs font-black shadow-sm transition-all active:scale-95 group"
+              title="Top-Up GamePass"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+              <span>GamePass</span>
+              <span className="hidden sm:inline px-1 py-0.2 rounded text-[9px] bg-amber-500/30 text-amber-200 uppercase font-black">
+                HOT
+              </span>
+            </Link>
+
+            {/* Robux Top-Up Quick Link */}
+            <Link
+              to="/topup?tab=robux"
               onClick={() => haptic('light')}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/40 text-pink-300 hover:text-white text-xs font-black shadow-sm transition-all active:scale-95 group"
             >

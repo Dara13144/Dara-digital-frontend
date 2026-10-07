@@ -30,6 +30,7 @@ import { AdminCoupons } from './pages/admin/AdminCoupons.jsx';
 import { AdminSettings } from './pages/admin/AdminSettings.jsx';
 import { AdminLogs } from './pages/admin/AdminLogs.jsx';
 import { AdminFlashSale } from './pages/admin/AdminFlashSale.jsx';
+import { AdminTopUp } from './pages/admin/AdminTopUp.jsx';
 
 export default function App() {
   return (
@@ -47,6 +48,7 @@ export default function App() {
         <Route path="profile" element={<Profile />} />
         <Route path="wallet" element={<Wallet />} />
         <Route path="topup" element={<TopUp />} />
+        <Route path="gamepass" element={<TopUp />} />
         <Route path="support" element={<Support />} />
       </Route>
 
@@ -54,6 +56,7 @@ export default function App() {
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
         <Route path="products" element={<AdminProducts />} />
+        <Route path="topup" element={<AdminTopUp />} />
         <Route path="stock" element={<AdminStock />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="orders/:id" element={<AdminOrderDetail />} />

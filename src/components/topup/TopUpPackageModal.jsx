@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '../common/Modal.jsx';
+import { ImageUploader } from '../common/ImageUploader.jsx';
 import { endpoints } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import { Package, Trash2, Save, Sparkles, Zap, Gamepad2, AlertCircle } from 'lucide-react';
@@ -16,6 +17,7 @@ export function TopUpPackageModal({ isOpen, onClose, packageToEdit, onSaved }) {
   const [description, setDescription] = useState('');
   const [instructions, setInstructions] = useState('Please enter your Roblox Username or Player ID at checkout.');
   const [featured, setFeatured] = useState(false);
+  const [imageUrl, setImageUrl] = useState('/categories/topup.png');
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -31,7 +33,8 @@ export function TopUpPackageModal({ isOpen, onClose, packageToEdit, onSaved }) {
       setDescription(packageToEdit.productData?.description || '');
       setInstructions(packageToEdit.productData?.instructions || 'Please enter your Roblox Username or Player ID at checkout.');
       setFeatured(Boolean(packageToEdit.productData?.featured));
-      setPackageType(packageToEdit.name?.toLowerCase().includes('blox') ? 'bloxfruits' : 'robux');
+      setPackageType(packageToEdit.isGamepass ? 'gamepass' : (packageToEdit.name?.toLowerCase().includes('blox') ? 'bloxfruits' : 'robux'));
+      setImageUrl(packageToEdit.productData?.images?.[0] || packageToEdit.image_url || (packageToEdit.isGamepass ? '/categories/gamepass.png' : '/categories/topup.png'));
     } else {
       setName('');
       setNameKm('');
@@ -42,6 +45,7 @@ export function TopUpPackageModal({ isOpen, onClose, packageToEdit, onSaved }) {
       setDescription('');
       setInstructions('Please enter your Roblox Username or Player ID at checkout.');
       setFeatured(false);
+      setImageUrl('/categories/topup.png');
     }
   }, [packageToEdit, isOpen]);
 
@@ -85,8 +89,9 @@ export function TopUpPackageModal({ isOpen, onClose, packageToEdit, onSaved }) {
         }
       }
 
+      const isGp = packageType === 'gamepass' || name.toLowerCase().includes('gamepass');
       const payload = {
-        category_id: TOPUP_CATEGORY_ID,
+        category_id: isGp ? '10000000-0000-0000-0000-000000000003' : TOPUP_CATEGORY_ID,
         name: name.trim(),
         name_km: nameKm.trim() || name.trim(),
         price: sellingPrice,
@@ -97,9 +102,9 @@ export function TopUpPackageModal({ isOpen, onClose, packageToEdit, onSaved }) {
         description_km: description.trim() || nameKm.trim(),
         instructions: instructions.trim(),
         badge: badge.trim(),
-        featured,
+        featured: false,
         published: true,
-        images: ['/categories/topup.png']
+        images: [imageUrl || (isGp ? '/categories/gamepass.png' : '/categories/topup.png')]
       };
 
       if (packageToEdit?.id) {
@@ -290,6 +295,15 @@ export function TopUpPackageModal({ isOpen, onClose, packageToEdit, onSaved }) {
             </select>
           </div>
         </div>
+
+        {/* Package Icon / Image */}
+        <ImageUploader
+          value={imageUrl}
+          onChange={setImageUrl}
+          folder="topup"
+          label="Package Icon / Banner Image"
+          placeholder="/categories/topup.png"
+        />
 
         {/* Description & Instructions */}
         <div className="space-y-1">

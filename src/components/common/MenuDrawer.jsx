@@ -64,17 +64,19 @@ export function MenuDrawer({ isOpen, onClose, onOpenTopUp }) {
 
   const mainNavLinks = [
     { to: '/', label: lang === 'km' ? 'ទំព័រដើម' : 'Home', icon: Home, color: 'text-cyan-400' },
-    { to: '/topup', label: lang === 'km' ? 'បញ្ចូលលុយហ្គេម (Top-Up)' : 'Game & Robux Top-Up', icon: Zap, color: 'text-amber-400' },
+    { to: '/topup?tab=gamepass', label: lang === 'km' ? 'បញ្ចូលលុយ GamePass (Blox Fruits)' : 'Top-Up GamePass (Blox Fruits)', icon: Sparkles, color: 'text-amber-400', badge: 'HOT' },
+    { to: '/topup?tab=robux', label: lang === 'km' ? 'បញ្ចូលលុយ Robux (Top-Up)' : 'Robux Fast Top-Up', icon: Zap, color: 'text-pink-400', badge: 'FAST' },
     { to: '/shop', label: lang === 'km' ? 'ផលិតផលទាំងអស់' : 'All Products & Games', icon: Grid, color: 'text-sky-400' },
     { to: '/wallet', label: lang === 'km' ? 'កាបូបលុយ (Wallet)' : 'Wallet & Balance', icon: Wallet, color: 'text-teal-400' },
     { to: '/orders', label: lang === 'km' ? 'ការបញ្ជាទិញ & កូដឌីជីថល' : 'My Orders & Digital Keys', icon: Package, color: 'text-blue-400' },
     { to: '/profile', label: lang === 'km' ? 'គណនីរបស់ខ្ញុំ' : 'My Profile & Settings', icon: User, color: 'text-purple-400' },
-    { to: '/support', label: lang === 'km' ? 'ជំនួយ & សេវាបម្រើ' : 'Customer Support', icon: Headphones, color: 'text-pink-400' }
+    { to: '/support', label: lang === 'km' ? 'ជំនួយ (@rybunrak)' : 'Customer Support (@rybunrak)', icon: Headphones, color: 'text-pink-400' }
   ];
 
   const adminNavLinks = [
     { to: '/admin', label: 'Admin Overview', icon: ShieldCheck },
     { to: '/admin/products', label: 'Products & Catalog', icon: Tag },
+    { to: '/admin/topup', label: 'GamePass & Top-Up Hub', icon: Sparkles, badge: 'HOT' },
     { to: '/admin/stock', label: 'Digital Stock & Keys', icon: Boxes },
     { to: '/admin/orders', label: 'Orders & Deliveries', icon: Package },
     { to: '/admin/payments', label: 'Payments & Audits', icon: CreditCard },
@@ -233,8 +235,14 @@ export function MenuDrawer({ isOpen, onClose, onOpenTopUp }) {
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  {item.badge > 0 && (
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black shadow-glow-green">
+                  {Boolean(item.badge) && (
+                    <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                      item.badge === 'HOT'
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                        : item.badge === 'FAST'
+                        ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40'
+                        : 'bg-emerald-500 text-slate-950 shadow-glow-green'
+                    }`}>
                       {item.badge}
                     </span>
                   )}
@@ -273,6 +281,11 @@ export function MenuDrawer({ isOpen, onClose, onOpenTopUp }) {
                     <div className="flex items-center gap-2.5">
                       <Icon className="w-3.5 h-3.5 text-amber-400" />
                       <span>{item.label}</span>
+                      {item.badge && (
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-500 to-pink-500 text-white shadow-sm">
+                          {item.badge}
+                        </span>
+                      )}
                     </div>
                     <ChevronRight className="w-3 h-3 text-slate-400" />
                   </Link>

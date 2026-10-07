@@ -13,37 +13,48 @@ import {
   ArrowRight,
   Flame,
   Clock,
-  Sparkles
+  Sparkles,
+  Settings,
+  Gamepad2,
+  ExternalLink
 } from 'lucide-react';
 import { endpoints } from '../../services/api.js';
 import { Badge } from '../../components/common/Badge.jsx';
+import { TopUpHubEditorModal } from '../../components/topup/TopUpHubEditorModal.jsx';
 
 export function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [flashSale, setFlashSale] = useState(null);
+  const [gamepassCount, setGamepassCount] = useState(8);
+  const [isGamepassEditorOpen, setIsGamepassEditorOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadStats() {
-      setLoading(true);
-      try {
-        const [dashRes, settingsRes] = await Promise.allSettled([
-          endpoints.admin.getDashboard(),
-          endpoints.admin.getSettings()
-        ]);
+  const loadStats = async () => {
+    setLoading(true);
+    try {
+      const [dashRes, settingsRes, gamepassRes] = await Promise.allSettled([
+        endpoints.admin.getDashboard(),
+        endpoints.admin.getSettings(),
+        endpoints.getProducts({ categorySlug: 'gamepass', limit: 100 })
+      ]);
 
-        if (dashRes.status === 'fulfilled' && dashRes.value?.success && dashRes.value.data) {
-          setStats(dashRes.value.data);
-        }
-        if (settingsRes.status === 'fulfilled' && settingsRes.value?.success && settingsRes.value.data) {
-          setFlashSale(settingsRes.value.data.flash_sale || null);
-        }
-      } catch (err) {
-        console.error('Error fetching admin stats:', err);
-      } finally {
-        setLoading(false);
+      if (dashRes.status === 'fulfilled' && dashRes.value?.success && dashRes.value.data) {
+        setStats(dashRes.value.data);
       }
+      if (settingsRes.status === 'fulfilled' && settingsRes.value?.success && settingsRes.value.data) {
+        setFlashSale(settingsRes.value.data.flash_sale || null);
+      }
+      if (gamepassRes.status === 'fulfilled' && gamepassRes.value?.success && Array.isArray(gamepassRes.value.data?.items)) {
+        setGamepassCount(gamepassRes.value.data.items.length || 8);
+      }
+    } catch (err) {
+      console.error('Error fetching admin stats:', err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadStats();
   }, []);
 
@@ -195,6 +206,54 @@ export function AdminDashboard() {
         </div>
       </div>
 
+      {/* GamePass Top-Up Hub System Editor Banner */}
+      <div className="p-5 rounded-2xl bg-gradient-to-r from-amber-950/40 via-purple-950/30 to-slate-900 border border-amber-500/40 shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="absolute top-0 right-0 w-80 h-full bg-gradient-to-l from-amber-500/10 to-transparent pointer-events-none" />
+        <div className="flex items-start sm:items-center gap-4 z-10">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-500 p-0.5 shadow-lg flex-shrink-0 flex items-center justify-center">
+            <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-amber-400 fill-amber-400 animate-pulse" />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-amber-500 to-pink-500 text-white font-black text-xs shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-amber-200" />
+                <span>GamePass ({gamepassCount})</span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/30 text-amber-100 font-black">HOT</span>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold border bg-emerald-500/10 border-emerald-500/30 text-emerald-400">
+                ● 1h - 24h Delivery System Active
+              </span>
+            </div>
+            <h4 className="text-base font-black text-slate-100">
+              Roblox & Blox Fruits GamePass Top-Up Hub
+            </h4>
+            <p className="text-xs text-slate-400 line-clamp-1">
+              Edit live package prices, icons, badges, upload custom images, and configure automatic Telegram delivery reporting.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5 z-10 flex-wrap sm:flex-nowrap">
+          <button
+            type="button"
+            onClick={() => setIsGamepassEditorOpen(true)}
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 hover:from-amber-400 hover:to-purple-500 text-white font-black text-xs shadow-lg shadow-pink-900/40 flex items-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          >
+            <Settings className="w-3.5 h-3.5" />
+            <span>Open System Editor</span>
+          </button>
+          <Link
+            to="/admin/topup"
+            className="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>Hub Details</span>
+          </Link>
+        </div>
+      </div>
+
       {/* 7-Day Performance Chart Breakdown */}
       <div className="p-5 rounded-2xl glass-card border border-slate-800 space-y-4">
         <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
@@ -283,6 +342,13 @@ export function AdminDashboard() {
           </table>
         </div>
       </div>
+
+      {/* GamePass & Top-Up Hub System Editor Modal */}
+      <TopUpHubEditorModal
+        isOpen={isGamepassEditorOpen}
+        onClose={() => setIsGamepassEditorOpen(false)}
+        onRefreshRequired={loadStats}
+      />
     </div>
   );
 }

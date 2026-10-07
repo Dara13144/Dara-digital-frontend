@@ -8,7 +8,7 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'https://dara-digital-backend.onrender.com',
+        target: 'http://localhost:5001',
         changeOrigin: true,
         secure: false
       }

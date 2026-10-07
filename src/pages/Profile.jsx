@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   User,
@@ -16,7 +16,8 @@ import {
   Plus,
   Bot,
   Send,
-  LogOut
+  LogOut,
+  UploadCloud
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
@@ -34,7 +35,46 @@ export function Profile() {
   const { haptic } = useTelegram();
   const toast = useToast();
   const [syncingAvatar, setSyncingAvatar] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [topUpOpen, setTopUpOpen] = useState(false);
+  const avatarInputRef = useRef(null);
+
+  const handleCustomAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please choose an image file (PNG, JPG, WEBP)');
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error('Image must be under 8MB');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    haptic('medium');
+    try {
+      const upRes = await endpoints.uploadImage(file, 'avatars');
+      if (upRes.success && upRes.data?.url) {
+        const cdnUrl = upRes.data.url;
+        const updateRes = await endpoints.updateAvatar(cdnUrl);
+        if (updateRes.success) {
+          setUser((prev) => ({ ...prev, avatar_url: cdnUrl }));
+          toast.success('Profile avatar updated successfully!');
+        } else {
+          toast.error(updateRes.error?.message || 'Failed to update avatar in database');
+        }
+      } else {
+        toast.error(upRes.error?.message || 'Avatar upload failed');
+      }
+    } catch (err) {
+      toast.error(err.message || 'Avatar upload failed');
+    } finally {
+      setUploadingAvatar(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
+    }
+  };
 
   const handleSyncTelegramAvatar = async () => {
     haptic('medium');
@@ -88,14 +128,31 @@ export function Profile() {
         <div className="flex items-center gap-4">
           <div className="relative group">
             <UserAvatar user={user} size="xl" showBadge={isAdmin} ring={true} />
-            <button
-              onClick={handleSyncTelegramAvatar}
-              disabled={syncingAvatar}
-              title="Sync Photo from Telegram"
-              className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-slate-900 border border-emerald-500/50 text-emerald-400 hover:text-emerald-300 hover:bg-slate-800 transition-all shadow-md active:scale-95 disabled:opacity-50"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${syncingAvatar ? 'animate-spin' : ''}`} />
-            </button>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleCustomAvatarUpload}
+            />
+            <div className="absolute -bottom-1 -right-2 flex items-center gap-1">
+              <button
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={uploadingAvatar}
+                title="Upload Photo"
+                className="p-1.5 rounded-full bg-slate-900 border border-pink-500/50 text-pink-400 hover:text-pink-300 hover:bg-slate-800 transition-all shadow-md active:scale-95 disabled:opacity-50"
+              >
+                <Camera className={`w-3.5 h-3.5 ${uploadingAvatar ? 'animate-pulse' : ''}`} />
+              </button>
+              <button
+                onClick={handleSyncTelegramAvatar}
+                disabled={syncingAvatar}
+                title="Sync Photo from Telegram"
+                className="p-1.5 rounded-full bg-slate-900 border border-emerald-500/50 text-emerald-400 hover:text-emerald-300 hover:bg-slate-800 transition-all shadow-md active:scale-95 disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${syncingAvatar ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 min-w-0">

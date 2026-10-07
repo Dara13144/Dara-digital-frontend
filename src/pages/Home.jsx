@@ -45,17 +45,22 @@ export function Home() {
         ]);
 
         if (catsRes.status === 'fulfilled' && catsRes.value?.success) setCategories(catsRes.value.data);
+        const isExcluded = (p) =>
+          p.category?.slug === 'topup' ||
+          p.category?.slug === 'gamepass' ||
+          p.category_id === '10000000-0000-0000-0000-000000000006' ||
+          p.category_id === '10000000-0000-0000-0000-000000000003' ||
+          p.name?.toLowerCase().includes('gamepass') ||
+          p.name?.toLowerCase().includes('fast top-up') ||
+          p.name?.toLowerCase().includes('robux');
+
         if (featRes.status === 'fulfilled' && featRes.value?.success) {
-          const nonTopUp = (featRes.value.data.items || []).filter(
-            (p) => p.category?.slug !== 'topup' && p.category_id !== '10000000-0000-0000-0000-000000000006' && !p.name?.toLowerCase().includes('fast top-up')
-          );
-          setFeaturedProducts(nonTopUp);
+          const filtered = (featRes.value.data.items || []).filter((p) => !isExcluded(p));
+          setFeaturedProducts(filtered);
         }
         if (discRes.status === 'fulfilled' && discRes.value?.success) {
-          const nonTopUp = (discRes.value.data.items || []).filter(
-            (p) => p.category?.slug !== 'topup' && p.category_id !== '10000000-0000-0000-0000-000000000006' && !p.name?.toLowerCase().includes('fast top-up')
-          );
-          setDiscountProducts(nonTopUp);
+          const filtered = (discRes.value.data.items || []).filter((p) => !isExcluded(p));
+          setDiscountProducts(filtered);
         }
         if (settingsRes.status === 'fulfilled' && settingsRes.value?.success && settingsRes.value.data?.flash_sale) {
           setFlashSale(settingsRes.value.data.flash_sale);

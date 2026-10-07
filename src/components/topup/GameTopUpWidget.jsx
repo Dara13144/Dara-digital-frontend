@@ -13,9 +13,9 @@ import {
   Flame,
   BadgeCheck,
   Info,
-  Edit2,
   Plus,
-  Settings
+  Settings,
+  Clock
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -27,6 +27,114 @@ import { TopUpPackageModal } from './TopUpPackageModal.jsx';
 import { RobloxUserChecker } from '../roblox/RobloxUserChecker.jsx';
 
 const DEFAULT_PACKAGES = [
+  // --- GamePass Packages (Blox Fruits & Roblox) ---
+  {
+    id: '20000000-0000-0000-0000-000000000051',
+    name: '2x Mastery GamePass (Blox Fruits)',
+    name_km: 'GamePass 2x Mastery (Blox Fruits)',
+    amount: '2x Mastery',
+    price: 4.99,
+    originalPrice: 6.50,
+    badge: 'Best Seller',
+    badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+    discount: '-23%',
+    icon: Sparkles,
+    popular: true,
+    isGamepass: true,
+    isBlox: true
+  },
+  {
+    id: '20000000-0000-0000-0000-000000000052',
+    name: '2x Money GamePass (Blox Fruits)',
+    name_km: 'GamePass 2x Money (Blox Fruits)',
+    amount: '2x Money',
+    price: 4.99,
+    originalPrice: 6.50,
+    badge: 'Hot Deal',
+    badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    discount: '-23%',
+    icon: Flame,
+    popular: true,
+    isGamepass: true,
+    isBlox: true
+  },
+  {
+    id: '20000000-0000-0000-0000-000000000053',
+    name: 'Dark Blade (Yoru) GamePass',
+    name_km: 'GamePass Dark Blade / Yoru',
+    amount: 'Dark Blade',
+    price: 12.99,
+    originalPrice: 16.00,
+    badge: 'Mythical',
+    badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+    discount: '-19%',
+    icon: Zap,
+    popular: true,
+    isGamepass: true,
+    isBlox: true
+  },
+  {
+    id: '20000000-0000-0000-0000-000000000054',
+    name: 'Fast Boats (Luxury Boats) GamePass',
+    name_km: 'GamePass Fast Boats',
+    amount: 'Fast Boats',
+    price: 3.99,
+    originalPrice: 5.00,
+    badge: 'Popular',
+    badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    discount: '-20%',
+    icon: Gamepad2,
+    popular: false,
+    isGamepass: true,
+    isBlox: true
+  },
+  {
+    id: '20000000-0000-0000-0000-000000000055',
+    name: '2x Boss Drops GamePass',
+    name_km: 'GamePass 2x Boss Drops',
+    amount: '2x Drops',
+    price: 3.99,
+    originalPrice: 5.00,
+    badge: 'Special',
+    badgeColor: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
+    discount: '-20%',
+    icon: Sparkles,
+    popular: false,
+    isGamepass: true,
+    isBlox: true
+  },
+  {
+    id: '20000000-0000-0000-0000-000000000056',
+    name: '+1 Fruit Storage (+1 Capacity)',
+    name_km: 'GamePass +1 Fruit Storage',
+    amount: '+1 Storage',
+    price: 4.50,
+    originalPrice: 5.50,
+    badge: 'Best Value',
+    badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+    discount: '-18%',
+    icon: Sparkles,
+    popular: true,
+    isGamepass: true,
+    isBlox: true
+  },
+  {
+    id: '20000000-0000-0000-0000-000000000057',
+    name: 'Fruit Notifier GamePass',
+    name_km: 'GamePass Fruit Notifier',
+    amount: 'Notifier',
+    price: 27.99,
+    originalPrice: 32.00,
+    badge: 'VIP / Ultra',
+    badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
+    discount: '-13%',
+    icon: Flame,
+    popular: true,
+    isGamepass: true,
+    isBlox: true
+  },
+
+  // --- Robux Packages ---
   {
     id: '20000000-0000-0000-0000-000000000100',
     name: '100 Robux Fast Top-Up',
@@ -156,10 +264,26 @@ const DEFAULT_PACKAGES = [
     discount: null,
     icon: Flame,
     popular: true
+  },
+
+  // --- Blox Fruits Beli & Fragments Raid Package ---
+  {
+    id: '20000000-0000-0000-0000-000000000013',
+    name: 'Blox Fruits 5M Beli + 15k Fragments',
+    name_km: 'កញ្ចប់ 5M Beli + 15k Fragments (Blox Fruits)',
+    amount: '5M Beli + 15k Frag',
+    price: 3.50,
+    originalPrice: 5.00,
+    badge: 'Popular',
+    badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+    discount: '-30%',
+    icon: Gamepad2,
+    popular: true,
+    isBlox: true
   }
 ];
 
-export function GameTopUpWidget({ onDirectCheckout }) {
+export function GameTopUpWidget({ onDirectCheckout, initialTab = 'all' }) {
   const [playerId, setPlayerId] = useState(() => {
     try {
       const saved = localStorage.getItem('daramini_roblox_user');
@@ -177,10 +301,30 @@ export function GameTopUpWidget({ onDirectCheckout }) {
     } catch (e) {}
     return null;
   });
-  const [selectedPkg, setSelectedPkg] = useState(DEFAULT_PACKAGES[0]);
+
+  const [filterTab, setFilterTab] = useState(initialTab || 'all');
   const [packages, setPackages] = useState(DEFAULT_PACKAGES);
-  const [filterTab, setFilterTab] = useState('all'); // 'all', 'robux', 'bloxfruits'
+  const [selectedPkg, setSelectedPkg] = useState(() => {
+    if (initialTab === 'gamepass') {
+      return DEFAULT_PACKAGES.find((p) => p.isGamepass) || DEFAULT_PACKAGES[0];
+    }
+    return DEFAULT_PACKAGES[0];
+  });
   const [verified, setVerified] = useState(() => !!robloxUser);
+
+  // Sync initialTab when props change (e.g. navigation URL changes)
+  useEffect(() => {
+    if (initialTab && ['all', 'gamepass', 'robux', 'bloxfruits'].includes(initialTab)) {
+      setFilterTab(initialTab);
+      if (initialTab === 'gamepass') {
+        const firstGp = packages.find((p) => p.isGamepass);
+        if (firstGp) setSelectedPkg(firstGp);
+      } else if (initialTab === 'robux') {
+        const firstRobux = packages.find((p) => !p.isBlox && !p.isGamepass);
+        if (firstRobux) setSelectedPkg(firstRobux);
+      }
+    }
+  }, [initialTab]);
 
   // Admin Edit Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -193,26 +337,45 @@ export function GameTopUpWidget({ onDirectCheckout }) {
   const toast = useToast();
   const navigate = useNavigate();
 
-  // Load actual backend topup products from Supabase
+  // Load actual backend topup products from Supabase/API
   const loadTopUpProducts = async () => {
     try {
-      const res = await endpoints.getProducts({ categorySlug: 'topup', sortBy: 'price_asc', limit: 50 });
-      if (res.success && res.data?.items?.length > 0) {
-        const mapped = res.data.items.map((prod, index) => {
-          const isBlox = prod.name.toLowerCase().includes('blox') || prod.name.toLowerCase().includes('beli');
+      const [topupRes, gamepassRes] = await Promise.all([
+        endpoints.getProducts({ categorySlug: 'topup', sortBy: 'price_asc', limit: 50 }).catch(() => null),
+        endpoints.getProducts({ categorySlug: 'gamepass', sortBy: 'price_asc', limit: 50 }).catch(() => null)
+      ]);
+
+      const fetchedItems = [
+        ...(topupRes?.success && Array.isArray(topupRes.data?.items) ? topupRes.data.items : []),
+        ...(gamepassRes?.success && Array.isArray(gamepassRes.data?.items) ? gamepassRes.data.items : [])
+      ];
+
+      if (fetchedItems.length > 0) {
+        const mapped = fetchedItems.map((prod, index) => {
+          const isGamepass =
+            prod.name.toLowerCase().includes('gamepass') ||
+            prod.category?.slug === 'gamepass' ||
+            prod.description?.toLowerCase().includes('gamepass');
+
+          const isBlox =
+            prod.name.toLowerCase().includes('blox') ||
+            prod.name.toLowerCase().includes('beli') ||
+            isGamepass;
+
+          const isRobux =
+            (prod.name.toLowerCase().includes('robux') || prod.name.includes('R$')) &&
+            !isGamepass;
+
           const numMatch = prod.name.match(/[\d,]+/)?.[0];
-          const isRobux = prod.name.toLowerCase().includes('robux') || prod.name.includes('R$');
           const amountDisplay = isRobux
             ? (numMatch ? `${numMatch} R$` : 'Robux')
             : (prod.name.match(/\((.*?)\)/)?.[1] || prod.name);
 
-          // Use badge from database or fallback preset
           const badge = prod.badge || (
+            isGamepass ? 'GamePass' :
             index === 0 ? 'Starter' :
             index === 4 ? 'Best Value' :
-            index === 7 ? 'Hot Deal' :
-            index === 9 ? 'Super Value' :
-            (index === 3 || index === 6 || index === 8) ? 'Special' : 'Popular'
+            'Popular'
           );
 
           let badgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
@@ -222,7 +385,7 @@ export function GameTopUpWidget({ onDirectCheckout }) {
             badgeColor = 'bg-purple-500/20 text-purple-300 border-purple-500/30';
           } else if (badge === 'Hot Deal') {
             badgeColor = 'bg-rose-500/20 text-rose-300 border-rose-500/30';
-          } else if (badge === 'Popular') {
+          } else if (isGamepass) {
             badgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
           }
 
@@ -236,17 +399,25 @@ export function GameTopUpWidget({ onDirectCheckout }) {
             badge,
             badgeColor,
             discount: prod.discount_price ? `-${Math.round((1 - prod.discount_price / prod.price) * 100)}%` : null,
-            icon: isBlox ? Gamepad2 : (badge === 'Starter' || badge === 'Best Value' || badge === 'Super Value' ? Flame : Zap),
-            popular: badge === 'Popular' || badge === 'Best Value' || badge === 'Super Value',
+            icon: isGamepass ? Sparkles : isBlox ? Gamepad2 : Zap,
+            popular: badge === 'Popular' || badge === 'Best Value' || isGamepass,
             isBlox,
+            isGamepass,
             productData: prod
           };
         });
-        setPackages(mapped);
+
+        // Merge with DEFAULT_PACKAGES so predefined gamepasses remain present
+        const mergedMap = new Map();
+        DEFAULT_PACKAGES.forEach((p) => mergedMap.set(p.id, p));
+        mapped.forEach((p) => mergedMap.set(p.id, p));
+        const mergedList = Array.from(mergedMap.values());
+
+        setPackages(mergedList);
         setSelectedPkg((prev) => {
-          if (!prev) return mapped[0];
-          const fresh = mapped.find((p) => p.id === prev.id);
-          return fresh || mapped[0];
+          if (!prev) return mergedList[0];
+          const fresh = mergedList.find((p) => p.id === prev.id);
+          return fresh || mergedList[0];
         });
       }
     } catch (err) {
@@ -266,39 +437,45 @@ export function GameTopUpWidget({ onDirectCheckout }) {
       return;
     }
 
-    const note = robloxUser
-      ? `Roblox: ${robloxUser.displayName} (@${robloxUser.username}) | ID: ${robloxUser.id}`
-      : `Roblox Username / Player ID: ${trimmedId}`;
-
-    // Always use the latest live package price from database
     const activePkg = packages.find((p) => p.id === selectedPkg?.id) || selectedPkg;
     const freshPrice = Number(activePkg?.price ?? selectedPkg?.price ?? 0);
+
+    const deliveryTag = activePkg.isGamepass ? ' | Delivery: 1h-24h' : '';
+    const note = robloxUser
+      ? `Roblox Player: ${robloxUser.displayName} (@${robloxUser.username}) | ID: ${robloxUser.id} | Package: ${activePkg.name}${deliveryTag}`
+      : `Roblox Player / ID: ${trimmedId} | Package: ${activePkg.name}${deliveryTag}`;
 
     const itemToAdd = {
       id: activePkg.id,
       name: activePkg.name,
       price: freshPrice,
-      image_url: robloxUser?.avatarUrl || '/categories/topup.png',
+      image_url: activePkg.isGamepass ? '/categories/gamepass.png' : (robloxUser?.avatarUrl || '/categories/topup.png'),
       stock_type: 'manual',
+      categorySlug: activePkg.isGamepass ? 'gamepass' : 'topup',
       customerNotes: note
     };
 
     // Set quantity 1 with fresh live price
     addToCart(itemToAdd, 1, true);
-    toast.success(`Selected: ${activePkg.amount} ($${freshPrice.toFixed(2)}) for "${robloxUser ? robloxUser.displayName : trimmedId}"`);
-    
+    toast.success(`Selected: ${activePkg.name} ($${freshPrice.toFixed(2)}) for "${robloxUser ? robloxUser.displayName : trimmedId}"`);
+
     // Save to localStorage for checkout page autofill
     localStorage.setItem('daramini_topup_note', note);
-    
+
     navigate('/checkout');
   };
 
   // Filter packages by tab
   const displayedPackages = packages.filter((pkg) => {
-    if (filterTab === 'robux') return !pkg.isBlox;
-    if (filterTab === 'bloxfruits') return pkg.isBlox;
+    if (filterTab === 'gamepass') return pkg.isGamepass;
+    if (filterTab === 'robux') return !pkg.isBlox && !pkg.isGamepass;
+    if (filterTab === 'bloxfruits') return pkg.isBlox && !pkg.isGamepass;
     return true;
   });
+
+  const gamepassCount = packages.filter((p) => p.isGamepass).length;
+  const robuxCount = packages.filter((p) => !p.isBlox && !p.isGamepass).length;
+  const bloxCount = packages.filter((p) => p.isBlox && !p.isGamepass).length;
 
   return (
     <div className="relative w-full rounded-3xl bg-[#140e1b] border border-pink-500/30 p-5 sm:p-7 text-slate-100 shadow-[0_0_35px_rgba(236,72,153,0.18)] overflow-hidden">
@@ -309,58 +486,60 @@ export function GameTopUpWidget({ onDirectCheckout }) {
       {/* Header Banner */}
       <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-slate-800/80">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-[#1f0b18] border border-pink-500/50 flex items-center justify-center shadow-lg shadow-pink-500/30 shrink-0 p-1.5">
-            <img src="/icons/robux_gold.png" alt="Robux" className="w-full h-full object-contain animate-pulse" />
+          <div className="w-12 h-12 rounded-2xl bg-[#1f0b18] border border-amber-500/50 flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0 p-2">
+            <Sparkles className="w-full h-full text-amber-400 animate-pulse" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-lg sm:text-xl font-black text-white tracking-wide">
-                Roblox Fast Top-Up
+                Roblox & Blox Fruits GamePass Top-Up
               </h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                100% Safe
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                ⚡ 100% Safe Instant Delivery
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              {lang === 'km' 
-                ? 'បញ្ចូលលុយ Robux ភ្លាមៗ ធានា 100% គ្មានបញ្ហាគណនី' 
-                : 'Fast automated delivery with official guarantee & 24/7 support'}
+              {lang === 'km'
+                ? 'បញ្ចូល GamePass និង Robux ភ្លាមៗ ធានា ១០០% សុវត្ថិភាព គ្មានពាក្យសម្ងាត់'
+                : 'Fast automated delivery with official guarantee & 24/7 support via @rybunrak'}
             </p>
           </div>
         </div>
 
-        {/* Package Editor Header Action */}
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <button
-            type="button"
-            onClick={() => {
-              setPackageToEdit(null);
-              setIsModalOpen(true);
-            }}
-            className="px-3.5 py-1.5 rounded-xl bg-pink-500/20 hover:bg-pink-500/30 border border-pink-500/40 text-pink-300 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
-            title="Add or Edit Top-Up Packages in Supabase"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add Package</span>
-          </button>
-        </div>
+        {/* Package Editor Action (Admin) */}
+        {isAdmin && (
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <button
+              type="button"
+              onClick={() => {
+                setPackageToEdit(null);
+                setIsModalOpen(true);
+              }}
+              className="px-3.5 py-1.5 rounded-xl bg-pink-500/20 hover:bg-pink-500/30 border border-pink-500/40 text-pink-300 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
+              title="Add or Edit Top-Up Packages"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add Package</span>
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 pt-5">
-        {/* Left Side: Step 1 (Player ID) + Step 2 (Packages Grid) */}
+        {/* Left Side: Step 1 (Player ID Check) + Step 2 (Packages Grid) */}
         <div className="lg:col-span-8 space-y-6">
           {/* STEP 1: Enter Player ID & Live Roblox Check */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-extrabold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-pink-500 text-white text-[11px] font-black flex items-center justify-center">1</span>
-                <span>Enter Player ID / Roblox Username</span>
+                <span>Enter Roblox Username or Player ID</span>
                 <span className="text-pink-400">*</span>
               </label>
               {robloxUser && (
                 <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-semibold animate-in fade-in duration-200">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Verified Player Profile</span>
+                  <span>Verified Profile</span>
                 </span>
               )}
             </div>
@@ -382,7 +561,7 @@ export function GameTopUpWidget({ onDirectCheckout }) {
 
             <p className="text-[11px] text-slate-400 flex items-center gap-1.5 pl-1">
               <Info className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-              <span>Instant verification with official Roblox servers. No password required!</span>
+              <span>Live check with official Roblox servers. Your avatar is displayed automatically. Zero password required!</span>
             </p>
           </div>
 
@@ -391,41 +570,72 @@ export function GameTopUpWidget({ onDirectCheckout }) {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <label className="text-xs font-extrabold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-pink-500 text-white text-[11px] font-black flex items-center justify-center">2</span>
-                <span>Select Top-Up Package</span>
+                <span>Select Package</span>
               </label>
 
               {/* Sub-category Filter Tabs */}
-              {packages.some((p) => p.isBlox) && (
-                <div className="flex items-center gap-1 p-1 bg-slate-900/90 rounded-xl border border-slate-800 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setFilterTab('all')}
-                    className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
-                      filterTab === 'all' ? 'bg-pink-500 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    All ({packages.length})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFilterTab('robux')}
-                    className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
-                      filterTab === 'robux' ? 'bg-pink-500 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    Robux
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFilterTab('bloxfruits')}
-                    className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
-                      filterTab === 'bloxfruits' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    Blox Fruits
-                  </button>
-                </div>
-              )}
+              <div className="flex items-center gap-1 p-1 bg-slate-900/90 rounded-xl border border-slate-800 text-xs flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => {
+                    haptic('selection');
+                    setFilterTab('all');
+                  }}
+                  className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+                    filterTab === 'all' ? 'bg-pink-500 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  All ({packages.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    haptic('selection');
+                    setFilterTab('gamepass');
+                    const first = packages.find((p) => p.isGamepass);
+                    if (first) setSelectedPkg(first);
+                  }}
+                  className={`px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1 ${
+                    filterTab === 'gamepass'
+                      ? 'bg-gradient-to-r from-amber-500 to-pink-500 text-white shadow-sm'
+                      : 'text-amber-400/90 hover:text-amber-300'
+                  }`}
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span>GamePass ({gamepassCount})</span>
+                  <span className="text-[9px] px-1 py-0.2 rounded bg-amber-500/30 text-amber-200">HOT</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    haptic('selection');
+                    setFilterTab('robux');
+                    const first = packages.find((p) => !p.isBlox && !p.isGamepass);
+                    if (first) setSelectedPkg(first);
+                  }}
+                  className={`px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1 ${
+                    filterTab === 'robux' ? 'bg-pink-500 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Zap className="w-3 h-3" />
+                  <span>Robux ({robuxCount})</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    haptic('selection');
+                    setFilterTab('bloxfruits');
+                    const first = packages.find((p) => p.isBlox && !p.isGamepass);
+                    if (first) setSelectedPkg(first);
+                  }}
+                  className={`px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1 ${
+                    filterTab === 'bloxfruits' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Gamepad2 className="w-3 h-3" />
+                  <span>Blox Fruits ({bloxCount})</span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -447,31 +657,19 @@ export function GameTopUpWidget({ onDirectCheckout }) {
                         : 'bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 hover:border-slate-700'
                     }`}
                   >
-                    {/* Package quick edit button */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPackageToEdit(pkg);
-                        setIsModalOpen(true);
-                      }}
-                      className="absolute top-2.5 left-2.5 z-20 w-6 h-6 rounded-lg bg-slate-800/90 hover:bg-pink-500 text-slate-300 hover:text-white flex items-center justify-center opacity-80 hover:opacity-100 transition-all border border-slate-700 shadow-sm"
-                      title="Edit this package in Supabase"
-                    >
-                      <Edit2 className="w-3 h-3" />
-                    </button>
-
                     {/* Discount or badge */}
                     {pkg.badge && (
                       <span className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[9px] font-black border flex items-center gap-1 ${pkg.badgeColor}`}>
-                        {pkg.popular && <img src="/icons/hot_flame.png" alt="HOT" className="w-2.5 h-2.5 object-contain" />}
+                        {pkg.popular && <Flame className="w-2.5 h-2.5 text-amber-400" />}
                         {pkg.badge}
                       </span>
                     )}
 
                     <div className="space-y-1 mt-1">
                       <div className="w-9 h-9 rounded-xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center p-1 group-hover:scale-110 transition-transform mb-2">
-                        {pkg.amount?.includes('R$') || pkg.name?.toLowerCase().includes('robux') ? (
+                        {pkg.isGamepass ? (
+                          <Sparkles className="w-5 h-5 text-amber-400" />
+                        ) : pkg.amount?.includes('R$') || pkg.name?.toLowerCase().includes('robux') ? (
                           <img src="/icons/robux_gold.png" alt="Robux" className="w-full h-full object-contain drop-shadow" />
                         ) : (
                           <IconComponent className="w-4 h-4 text-pink-400" />
@@ -479,6 +677,12 @@ export function GameTopUpWidget({ onDirectCheckout }) {
                       </div>
                       <p className="text-xs font-bold text-slate-300 line-clamp-1">{pkg.name}</p>
                       <p className="text-sm sm:text-base font-black text-white">{pkg.amount}</p>
+                      {pkg.isGamepass && (
+                        <p className="text-[10px] font-bold text-amber-300 flex items-center gap-1 mt-0.5">
+                          <Clock className="w-2.5 h-2.5 text-amber-400" />
+                          <span>1h - 24h Delivery</span>
+                        </p>
+                      )}
                     </div>
 
                     <div className="mt-3 pt-2.5 border-t border-slate-800/60 flex items-baseline justify-between">
@@ -500,21 +704,23 @@ export function GameTopUpWidget({ onDirectCheckout }) {
                 );
               })}
 
-              {/* Add Package Card (To Supabase) */}
-              <button
-                type="button"
-                onClick={() => {
-                  setPackageToEdit(null);
-                  setIsModalOpen(true);
-                }}
-                className="p-3.5 sm:p-4 rounded-2xl border-2 border-dashed border-slate-800 hover:border-pink-500/60 bg-slate-900/30 hover:bg-slate-900/60 text-slate-400 hover:text-pink-400 flex flex-col items-center justify-center gap-2 transition-all min-h-[140px] group cursor-pointer"
-              >
-                <div className="w-10 h-10 rounded-xl bg-slate-800 group-hover:bg-pink-500/20 flex items-center justify-center transition-colors">
-                  <Plus className="w-5 h-5 text-slate-400 group-hover:text-pink-400" />
-                </div>
-                <span className="text-xs font-bold">Add Package</span>
-                <span className="text-[10px] text-slate-500">To Supabase</span>
-              </button>
+              {/* Add Package Card (Admin only) */}
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPackageToEdit(null);
+                    setIsModalOpen(true);
+                  }}
+                  className="p-3.5 sm:p-4 rounded-2xl border-2 border-dashed border-slate-800 hover:border-pink-500/60 bg-slate-900/30 hover:bg-slate-900/60 text-slate-400 hover:text-pink-400 flex flex-col items-center justify-center gap-2 transition-all min-h-[140px] group cursor-pointer"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-slate-800 group-hover:bg-pink-500/20 flex items-center justify-center transition-colors">
+                    <Plus className="w-5 h-5 text-slate-400 group-hover:text-pink-400" />
+                  </div>
+                  <span className="text-xs font-bold">Add Package</span>
+                  <span className="text-[10px] text-slate-500">To Store</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -559,7 +765,14 @@ export function GameTopUpWidget({ onDirectCheckout }) {
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-400">Delivery Speed:</span>
-                <span className="font-bold text-emerald-400">⚡ Instant (1-3 min)</span>
+                {selectedPkg?.isGamepass ? (
+                  <span className="font-bold text-amber-300 font-mono flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                    <span>1 Hour - 24 Hours</span>
+                  </span>
+                ) : (
+                  <span className="font-bold text-emerald-400">⚡ Instant (1-5 min)</span>
+                )}
               </div>
               <div className="flex justify-between items-center text-xs pt-2 border-t border-slate-800">
                 <span className="text-slate-400">Total Price:</span>
@@ -592,10 +805,12 @@ export function GameTopUpWidget({ onDirectCheckout }) {
             <button
               type="button"
               onClick={handleTopUpNow}
-              className="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-black text-sm shadow-lg shadow-pink-500/25 active:scale-98 transition-all flex items-center justify-center gap-2 group"
+              className="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-black text-sm shadow-lg shadow-pink-500/25 active:scale-98 transition-all flex items-center justify-center gap-2 group cursor-pointer"
             >
               <Zap className="w-4 h-4 fill-white group-hover:scale-110 transition-transform" />
-              <span>Top Up Now (${(selectedPkg?.price || 0).toFixed(2)})</span>
+              <span>
+                {selectedPkg?.isGamepass ? 'Top Up GamePass' : 'Top Up Now'} (${(selectedPkg?.price || 0).toFixed(2)})
+              </span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -603,15 +818,17 @@ export function GameTopUpWidget({ onDirectCheckout }) {
       </div>
 
       {/* Admin Package Add / Edit Modal */}
-      <TopUpPackageModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setPackageToEdit(null);
-        }}
-        packageToEdit={packageToEdit}
-        onSaved={loadTopUpProducts}
-      />
+      {isAdmin && (
+        <TopUpPackageModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setPackageToEdit(null);
+          }}
+          packageToEdit={packageToEdit}
+          onSaved={loadTopUpProducts}
+        />
+      )}
     </div>
   );
 }

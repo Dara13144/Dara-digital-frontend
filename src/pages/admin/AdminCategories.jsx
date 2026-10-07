@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FolderTree, Plus, Edit2, Trash2 } from 'lucide-react';
 import { endpoints } from '../../services/api.js';
 import { Modal } from '../../components/common/Modal.jsx';
+import { ImageUploader } from '../../components/common/ImageUploader.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 
 export function AdminCategories() {
@@ -184,6 +185,15 @@ export function AdminCategories() {
               <option value="Zap">Zap (Top-Up)</option>
             </select>
           </div>
+
+          <ImageUploader
+            value={formData.image_url}
+            onChange={(val) => setFormData({ ...formData, image_url: val })}
+            folder="categories"
+            multiple={false}
+            label="Category Image / Banner"
+            helperText="Upload category thumbnail or banner (PNG, JPG, WebP)"
+          />
 
           <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
             <button

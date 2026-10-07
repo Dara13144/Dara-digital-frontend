@@ -15,7 +15,8 @@ import {
   Menu,
   X,
   ShieldCheck,
-  Flame
+  Flame,
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useLanguage } from '../context/LanguageContext.jsx';
@@ -32,6 +33,7 @@ export function AdminLayout() {
   const navItems = [
     { to: '/admin', label: t('admin.dashboard'), icon: LayoutDashboard, end: true },
     { to: '/admin/products', label: t('admin.products'), icon: Package },
+    { to: '/admin/topup', label: 'GamePass & Top-Up Hub', icon: Sparkles, badge: 'HOT' },
     { to: '/admin/flash-sale', label: 'Flash Sale & Deals', icon: Flame },
     { to: '/admin/stock', label: t('admin.stock'), icon: Boxes },
     { to: '/admin/orders', label: t('admin.orders'), icon: ShoppingCart },
@@ -155,7 +157,12 @@ export function AdminLayout() {
                 }
               >
                 <Icon className="w-4 h-4 flex-shrink-0" />
-                <span>{item.label}</span>
+                <span className="flex-1 truncate">{item.label}</span>
+                {item.badge && (
+                  <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-500 to-pink-500 text-white shadow-sm">
+                    {item.badge}
+                  </span>
+                )}
               </NavLink>
             );
           })}

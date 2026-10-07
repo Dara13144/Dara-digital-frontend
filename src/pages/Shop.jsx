@@ -79,12 +79,17 @@ export function Shop() {
 
         const res = await endpoints.getProducts(params);
         if (res.success) {
-          const list = selectedCategory === 'topup'
+          const isSpecialTab = selectedCategory === 'topup' || selectedCategory === 'gamepass';
+          const list = isSpecialTab
             ? res.data.items
             : res.data.items.filter(
                 (p) => p.category?.slug !== 'topup' &&
+                       p.category?.slug !== 'gamepass' &&
                        p.category_id !== '10000000-0000-0000-0000-000000000006' &&
-                       !p.name?.toLowerCase().includes('fast top-up')
+                       p.category_id !== '10000000-0000-0000-0000-000000000003' &&
+                       !p.name?.toLowerCase().includes('fast top-up') &&
+                       !p.name?.toLowerCase().includes('gamepass') &&
+                       !p.name?.toLowerCase().includes('robux')
               );
           setProducts(list);
         }

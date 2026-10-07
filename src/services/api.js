@@ -20,6 +20,9 @@ const getApiBaseUrl = () => {
   if (envUrl) {
     return normalizeApiUrl(envUrl);
   }
+  if (isLocalhost) {
+    return 'http://localhost:5001/api';
+  }
   return 'https://dara-digital-backend.onrender.com/api';
 };
 
@@ -85,6 +88,24 @@ export const endpoints = {
 
   // Roblox
   checkRobloxUser: (query) => api.get(`/roblox/check?username=${encodeURIComponent(query)}`),
+
+  // Upload System
+  uploadImage: async (fileOrBase64, folder = 'products') => {
+    let imageBase64 = fileOrBase64;
+    let filename = 'image.png';
+
+    if (typeof window !== 'undefined' && fileOrBase64 instanceof File) {
+      filename = fileOrBase64.name;
+      imageBase64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (err) => reject(err);
+        reader.readAsDataURL(fileOrBase64);
+      });
+    }
+
+    return api.post('/upload/image', { image: imageBase64, folder, filename });
+  },
 
   // Orders
   checkout: (data) => api.post('/orders', data),
