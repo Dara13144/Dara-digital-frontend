@@ -325,19 +325,46 @@ export function OrderDetail() {
         </h3>
 
         <div className="space-y-3">
-          {order.items?.map((item) => (
-            <div key={item.id} className="flex justify-between items-center text-xs">
-              <div>
-                <p className="font-bold text-slate-100">{item.product_name}</p>
-                <p className="text-[11px] text-slate-400">
-                  Qty: {item.quantity} × ${Number(item.unit_price).toFixed(2)}
-                </p>
+          {order.items?.map((item) => {
+            const isGp = item.product_name?.toLowerCase().includes('gamepass') || isGamepassOrder;
+            const badge = isGp
+              ? item.product_name?.toLowerCase().includes('2x mastery') ? 'Best Seller'
+                : item.product_name?.toLowerCase().includes('2x money') ? 'Hot Deal'
+                : item.product_name?.toLowerCase().includes('dark blade') ? 'Mythical'
+                : item.product_name?.toLowerCase().includes('fast boats') ? 'Popular'
+                : item.product_name?.toLowerCase().includes('2x boss') ? 'Special'
+                : item.product_name?.toLowerCase().includes('+1 fruit') ? 'Best Value'
+                : item.product_name?.toLowerCase().includes('notifier') ? 'VIP / Ultra'
+                : 'GamePass'
+              : null;
+
+            return (
+              <div key={item.id} className="flex justify-between items-center text-xs">
+                <div>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className="font-bold text-slate-100">{item.product_name}</p>
+                    {badge && (
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                        {badge}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-400">
+                    <span>Qty: {item.quantity} × ${Number(item.unit_price).toFixed(2)}</span>
+                    {isGp && (
+                      <span className="text-amber-400 font-bold flex items-center gap-0.5">
+                        <Clock className="w-2.5 h-2.5" />
+                        <span>1h - 24h Delivery</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <span className="font-black text-slate-200">
+                  ${Number(item.total_price).toFixed(2)}
+                </span>
               </div>
-              <span className="font-black text-slate-200">
-                ${Number(item.total_price).toFixed(2)}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="pt-3 border-t border-slate-800 space-y-1.5 text-xs">
