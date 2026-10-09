@@ -130,8 +130,6 @@ export function AuthProvider({ children }) {
   };
 
   const ADMIN_EMAILS = [
-    'darazzdev@gmail.com',
-    'admin@daradigital.store',
     'bunrak778@gmail.com',
     'finozzz377@gmail.com',
     'mdara9695@gmail.com'
@@ -141,7 +139,6 @@ export function AuthProvider({ children }) {
   const isAdmin = Boolean(
     (user?.username && user.username.toLowerCase() === 'darazzdev') ||
     (userEmail && ADMIN_EMAILS.includes(userEmail)) ||
-    (userEmail && (userEmail.includes('admin') || userEmail.includes('darazzdev'))) ||
     user?.roles?.some((r) => ['ADMIN', 'SUPER_ADMIN'].includes(r))
   );
 

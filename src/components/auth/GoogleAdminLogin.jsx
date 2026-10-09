@@ -6,7 +6,7 @@ export function GoogleAdminLogin({ onSuccess, fullWidth = false }) {
   const { loginWithGoogle, loading } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showDirectInput, setShowDirectInput] = useState(false);
-  const [customEmail, setCustomEmail] = useState('darazzdev@gmail.com');
+  const [customEmail, setCustomEmail] = useState('bunrak778@gmail.com');
   const googleBtnRef = useRef(null);
 
   useEffect(() => {
@@ -41,8 +41,7 @@ export function GoogleAdminLogin({ onSuccess, fullWidth = false }) {
   const AUTHORIZED_ADMINS = [
     'bunrak778@gmail.com',
     'finozzz377@gmail.com',
-    'mdara9695@gmail.com',
-    'darazzdev@gmail.com'
+    'mdara9695@gmail.com'
   ];
 
   const handleCustomGoogleLogin = async (emailToUse) => {
