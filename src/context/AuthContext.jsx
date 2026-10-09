@@ -48,6 +48,40 @@ export function AuthProvider({ children }) {
     async function initAuth() {
       setLoading(true);
       try {
+        // Check for incoming OAuth token or error in URL search params
+        if (typeof window !== 'undefined') {
+          const urlParams = new URLSearchParams(window.location.search);
+          const incomingToken = urlParams.get('token');
+          const authError = urlParams.get('auth_error');
+
+          if (incomingToken) {
+            localStorage.setItem('daramini_token', incomingToken);
+            if (isMounted) setToken(incomingToken);
+
+            urlParams.delete('token');
+            urlParams.delete('auth_success');
+            const newSearch = urlParams.toString();
+            const newUrl = window.location.pathname + (newSearch ? `?${newSearch}` : '') + window.location.hash;
+            window.history.replaceState({}, document.title, newUrl);
+
+            try {
+              const profile = await loadUserProfile();
+              if (profile && isMounted) {
+                toast.success(`Welcome, ${profile.first_name || 'Customer'}!`);
+                return;
+              }
+            } catch (profileErr) {
+              console.warn('OAuth profile load note:', profileErr.message);
+            }
+          } else if (authError) {
+            urlParams.delete('auth_error');
+            const newSearch = urlParams.toString();
+            const newUrl = window.location.pathname + (newSearch ? `?${newSearch}` : '') + window.location.hash;
+            window.history.replaceState({}, document.title, newUrl);
+            toast.error(`Google Sign-In: ${authError}`);
+          }
+        }
+
         const savedToken = localStorage.getItem('daramini_token');
         if (savedToken) {
           try {
@@ -142,6 +176,10 @@ export function AuthProvider({ children }) {
     user?.roles?.some((r) => ['ADMIN', 'SUPER_ADMIN'].includes(r))
   );
 
+  const redirectToGoogle = (returnTo = (typeof window !== 'undefined' ? window.location.pathname : '/'), mode = 'user') => {
+    endpoints.redirectToGoogleOAuth(returnTo, mode);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -155,6 +193,7 @@ export function AuthProvider({ children }) {
         setUser,
         refreshProfile: loadUserProfile,
         loginWithGoogle,
+        redirectToGoogle,
         loginAsMock,
         logout
       }}

@@ -3,7 +3,7 @@ import { ShieldCheck, Mail, Lock, Sparkles, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 
 export function GoogleAdminLogin({ onSuccess, fullWidth = false }) {
-  const { loginWithGoogle, loading } = useAuth();
+  const { loginWithGoogle, redirectToGoogle, loading } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showDirectInput, setShowDirectInput] = useState(false);
   const [customEmail, setCustomEmail] = useState('bunrak778@gmail.com');
@@ -18,7 +18,7 @@ export function GoogleAdminLogin({ onSuccess, fullWidth = false }) {
           callback: async (response) => {
             if (response?.credential) {
               setIsProcessing(true);
-              await loginWithGoogle({ credential: response.credential });
+              await loginWithGoogle({ credential: response.credential, isAdminRequired: true });
               setIsProcessing(false);
               if (onSuccess) onSuccess();
             }
@@ -53,7 +53,8 @@ export function GoogleAdminLogin({ onSuccess, fullWidth = false }) {
       email,
       name,
       picture: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-      sub: 'google_oauth_sub_admin_' + Date.now()
+      sub: 'google_oauth_sub_admin_' + Date.now(),
+      isAdminRequired: true
     });
     
     setIsProcessing(false);
@@ -80,7 +81,8 @@ export function GoogleAdminLogin({ onSuccess, fullWidth = false }) {
                   email: profile.email,
                   name: profile.name,
                   picture: profile.picture,
-                  sub: profile.sub
+                  sub: profile.sub,
+                  isAdminRequired: true
                 });
                 setIsProcessing(false);
                 if (onSuccess) onSuccess();
@@ -98,6 +100,12 @@ export function GoogleAdminLogin({ onSuccess, fullWidth = false }) {
       } catch (err) {
         console.warn('Admin Google Token Client error:', err.message);
       }
+    }
+
+    // Direct OAuth redirect if GIS unavailable
+    if (redirectToGoogle) {
+      redirectToGoogle('/admin', 'admin');
+      return;
     }
 
     // Fallback to default admin

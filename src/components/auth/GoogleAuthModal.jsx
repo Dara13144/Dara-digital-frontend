@@ -6,7 +6,7 @@ import { useLanguage } from '../../context/LanguageContext.jsx';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 export function GoogleAuthModal() {
-  const { isAuthModalOpen, closeAuthModal, loginWithGoogle, loading } = useAuth();
+  const { isAuthModalOpen, closeAuthModal, loginWithGoogle, redirectToGoogle, loading } = useAuth();
   const { t } = useLanguage();
   const [isProcessing, setIsProcessing] = useState(false);
   const googleBtnRef = useRef(null);
@@ -15,7 +15,7 @@ export function GoogleAuthModal() {
     if (!isAuthModalOpen) return;
 
     // Initialize Google Identity Services if available
-    if (window.google?.accounts?.id) {
+    if (window.google?.accounts?.id && GOOGLE_CLIENT_ID) {
       try {
         window.google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
@@ -43,7 +43,7 @@ export function GoogleAuthModal() {
     setIsProcessing(true);
 
     // 1. Try Google Identity Services OAuth 2.0 Token Client (Popup flow)
-    if (window.google?.accounts?.oauth2) {
+    if (window.google?.accounts?.oauth2 && GOOGLE_CLIENT_ID) {
       try {
         const tokenClient = window.google.accounts.oauth2.initTokenClient({
           client_id: GOOGLE_CLIENT_ID,
@@ -51,9 +51,12 @@ export function GoogleAuthModal() {
           callback: async (tokenResponse) => {
             if (tokenResponse?.error) {
               setIsProcessing(false);
-              if (tokenResponse.error !== 'popup_closed_by_user') {
-                console.warn('Google OAuth prompt error:', tokenResponse.error);
+              if (tokenResponse.error === 'popup_closed_by_user') {
+                return;
               }
+              // If popup was blocked or failed, seamlessly redirect
+              console.warn('Google popup error, falling back to direct redirect:', tokenResponse.error);
+              redirectToGoogle(window.location.pathname);
               return;
             }
 
@@ -89,42 +92,18 @@ export function GoogleAuthModal() {
         tokenClient.requestAccessToken({ prompt: 'select_account' });
         return;
       } catch (err) {
-        console.warn('OAuth2 Token client initialization failed, falling back:', err.message);
-      }
-    }
-
-    // 2. Fallback to GIS prompt if available
-    if (window.google?.accounts?.id) {
-      try {
-        window.google.accounts.id.prompt(async (notification) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            const res = await loginWithGoogle({
-              email: 'customer@gmail.com',
-              name: 'Google Customer',
-              picture: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-              sub: 'google_customer_sub_' + Date.now()
-            });
-            setIsProcessing(false);
-            if (res?.success) closeAuthModal();
-          }
-        });
+        console.warn('OAuth2 Token client initialization failed, redirecting:', err.message);
+        redirectToGoogle(window.location.pathname);
         return;
-      } catch {
-        // Fallback
       }
     }
 
-    // 3. Fallback direct sign-in for dev testing
-    const res = await loginWithGoogle({
-      email: 'customer@gmail.com',
-      name: 'Google Customer',
-      picture: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-      sub: 'google_customer_sub_' + Date.now()
-    });
-    setIsProcessing(false);
-    if (res?.success) {
-      closeAuthModal();
-    }
+    // 2. Direct browser redirect to Google OAuth endpoint (GET /api/auth/google)
+    redirectToGoogle(window.location.pathname);
+  };
+
+  const handleDirectRedirect = () => {
+    redirectToGoogle(window.location.pathname);
   };
 
   return (
@@ -200,6 +179,17 @@ export function GoogleAuthModal() {
 
           {/* Hidden reference for GIS if needed */}
           <div ref={googleBtnRef} className="hidden" />
+
+          {/* Direct Browser Redirect Option */}
+          <div className="mt-3 pt-2 border-t border-slate-800/60 text-center">
+            <button
+              type="button"
+              onClick={handleDirectRedirect}
+              className="text-xs text-slate-400 hover:text-pink-400 underline underline-offset-2 transition-colors"
+            >
+              Popup blocked? Continue in Google page
+            </button>
+          </div>
         </div>
       </div>
     </div>

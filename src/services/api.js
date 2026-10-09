@@ -66,6 +66,13 @@ export const endpoints = {
   // Auth
   telegramAuth: (initData) => api.post('/telegram/auth', { initData }),
   googleAuth: (data) => api.post('/auth/google', data),
+  getGoogleAuthUrl: (returnTo = '/') => api.get('/auth/google', { params: { returnTo, json: 'true' } }),
+  redirectToGoogleOAuth: (returnTo = (typeof window !== 'undefined' ? window.location.pathname : '/'), mode = 'user') => {
+    if (typeof window !== 'undefined') {
+      const targetUrl = `${API_BASE_URL}/auth/google?returnTo=${encodeURIComponent(returnTo)}&mode=${mode}`;
+      window.location.href = targetUrl;
+    }
+  },
   mockLogin: (data) => api.post('/auth/mock-login', data),
 
   // User
