@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, Save, ShieldCheck } from 'lucide-react';
+import { Settings as SettingsIcon, Save, ShieldCheck, Send, MessageSquare } from 'lucide-react';
 import { endpoints } from '../../services/api.js';
 import { useToast } from '../../context/ToastContext.jsx';
 
@@ -15,6 +15,7 @@ export function AdminSettings() {
   });
 
   const [loading, setLoading] = useState(true);
+  const [testingTelegram, setTestingTelegram] = useState(false);
   const toast = useToast();
 
   useEffect(() => {
@@ -33,6 +34,22 @@ export function AdminSettings() {
     }
     loadSettings();
   }, []);
+
+  const handleTestTelegram = async () => {
+    setTestingTelegram(true);
+    try {
+      const res = await endpoints.admin.testTelegram();
+      if (res.success) {
+        toast.success('Test notification delivered to Telegram Bot & Group!');
+      } else {
+        toast.warn('Telegram test finished with partial delivery.');
+      }
+    } catch (err) {
+      toast.error(`Telegram test error: ${err.message}`);
+    } finally {
+      setTestingTelegram(false);
+    }
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -150,6 +167,7 @@ export function AdminSettings() {
         </div>
 
         {/* Google Admin OAuth Card */}
+        {/* Google Admin OAuth Card */}
         <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -163,6 +181,37 @@ export function AdminSettings() {
           <p className="text-[11px] text-slate-400">
             Administrators can log into the management system with Google OAuth. Authorized admin emails: <span className="font-mono text-cyan-400">bunrak778@gmail.com</span>, <span className="font-mono text-cyan-400">finozzz377@gmail.com</span>, <span className="font-mono text-cyan-400">mdara9695@gmail.com</span>.
           </p>
+        </div>
+
+        {/* Telegram Bot & Group Notification Broadcast Card */}
+        <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-cyan-400" />
+              <span className="font-bold text-slate-200">Telegram Bot & Group Notification System</span>
+            </div>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+              Dual Dispatch Active
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-400">
+            Real-time dual notification dispatch to both the <b>Telegram Bot (@Maiser_report_bot)</b> and the <b>Telegram Group/Channel</b> for all events across the website (New orders, GamePass deliveries, user logins, wallet top-ups, stock alerts).
+          </p>
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
+            <div className="text-[11px] text-slate-400 space-y-0.5">
+              <div>🤖 Bot: <span className="font-mono text-cyan-300">@Maiser_report_bot</span></div>
+              <div>👥 Group: <span className="font-mono text-cyan-300">-1003823688631</span></div>
+            </div>
+            <button
+              type="button"
+              disabled={testingTelegram}
+              onClick={handleTestTelegram}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-cyan-600/20 hover:bg-cyan-600/30 border border-cyan-500/40 text-cyan-300 font-bold text-[11px] transition-colors disabled:opacity-50"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>{testingTelegram ? 'Broadcasting...' : 'Test Bot & Group Send'}</span>
+            </button>
+          </div>
         </div>
 
         <div className="pt-3 border-t border-slate-800 flex justify-end">

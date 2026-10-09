@@ -169,6 +169,7 @@ export const endpoints = {
 
     getSettings: () => api.get('/admin/settings'),
     updateSettings: (data) => api.put('/admin/settings', data),
-    getLogs: (params) => api.get('/admin/logs', { params })
+    getLogs: (params) => api.get('/admin/logs', { params }),
+    testTelegram: () => api.post('/admin/telegram/test')
   }
 };
